@@ -948,7 +948,7 @@ const App = () => {
         e.preventDefault();
         const normalizedUsername = loginUsername.trim().toLowerCase();
 
-        if (normalizedUsername === 'admin' && loginPassword === 'admin002') {
+        if (normalizedUsername === 'skyview' && loginPassword === 'skyviewschool') {
             setIsAdmin(true);
             localStorage.setItem('et_is_admin', 'true');
             localStorage.setItem('et_login_username', normalizedUsername);
