@@ -3544,6 +3544,7 @@ function processMatrixRequest(action, param1, param2, param3, param4, param5) {
       // Header row: Admission No, Name, [subjects...]
       const headerRow = ['Admission No', 'Name', ...finalSubjects];
       console.log(`[Matrix] Writing headers with ${finalSubjects.length} subjects: ${JSON.stringify(headerRow.slice(0, 5))}...`);
+      console.log(`[Matrix] Full header row:`, headerRow);
       sheet.appendRow(headerRow);
 
       // Header formatting - wrap in try catch to prevent total failure on formatting errors
@@ -3561,9 +3562,11 @@ function processMatrixRequest(action, param1, param2, param3, param4, param5) {
       const filteredAssessments = allAssessments.filter(a =>
         a.term === term && a.examType === examType
       );
+      console.log(`[Matrix] Found ${filteredAssessments.length} assessments for ${term} ${examType}`);
 
       // Build student rows with existing scores
-      students.forEach(student => {
+      console.log(`[Matrix] Building ${students.length} student rows...`);
+      students.forEach((student, idx) => {
         const row = [student.admissionNo || student.id, student.name];
         finalSubjects.forEach(sub => {
           const found = filteredAssessments.find(a =>
@@ -3573,8 +3576,10 @@ function processMatrixRequest(action, param1, param2, param3, param4, param5) {
           );
           row.push(found ? found.score : '');
         });
+        console.log(`[Matrix] Student ${idx + 1}/${students.length}: ${student.name} - Row:`, row);
         sheet.appendRow(row);
       });
+      console.log(`[Matrix] All student rows appended`);
 
       // Auto-resize columns
       sheet.autoResizeColumns(1, headerRow.length);
