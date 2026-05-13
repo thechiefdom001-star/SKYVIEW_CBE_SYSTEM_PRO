@@ -31,6 +31,7 @@ export const Settings = ({ data, setData }) => {
         archives: true
     });
     const [clearExisting, setClearExisting] = useState(false);
+    const [fetchingSettings, setFetchingSettings] = useState(false);
     
     const [localSettings, setLocalSettings] = useState(data.settings);
     useEffect(() => {
@@ -122,6 +123,52 @@ export const Settings = ({ data, setData }) => {
             alert('❌ Error pushing settings: ' + error.message);
         } finally {
             setUpdating(false);
+        }
+    };
+
+    const handleFetchSettingsFromGoogle = async () => {
+        if (!settings.googleScriptUrl) {
+            alert('Please enter the Google Sheet URL first');
+            return;
+        }
+
+        setFetchingSettings(true);
+        try {
+            googleSheetSync.setSettings(settings);
+            const result = await googleSheetSync.fetchSettings();
+
+            console.log('[Settings Fetch] Result:', result);
+
+            if (result.success && result.settings) {
+                // Merge fetched settings with current settings, preserving some local values
+                const mergedSettings = {
+                    ...data.settings,
+                    ...result.settings,
+                    googleScriptUrl: settings.googleScriptUrl, // Keep the URL
+                    theme: data.settings?.theme, // Keep theme preference
+                    primaryColor: data.settings?.primaryColor, // Keep color preference
+                    secondaryColor: data.settings?.secondaryColor
+                };
+
+                setData({
+                    ...data,
+                    settings: mergedSettings
+                });
+
+                // Save to localStorage immediately
+                Storage.save({ ...data, settings: mergedSettings });
+
+                alert('✅ Settings fetched from Google Sheet successfully!\n\n' +
+                    'School Name: ' + (result.settings.schoolName || 'Updated') + '\n' +
+                    'Fee Structures: ' + (result.settings.feeStructures?.length || 0) + ' grades loaded');
+            } else {
+                alert('❌ Failed to fetch settings: ' + (result.error || 'No settings found'));
+            }
+        } catch (error) {
+            console.error('[Settings Fetch] Error:', error);
+            alert('❌ Error fetching settings: ' + error.message);
+        } finally {
+            setFetchingSettings(false);
         }
     };
 
@@ -1395,8 +1442,19 @@ export const Settings = ({ data, setData }) => {
                         >
                             🔗 Test Google Connection
                         </button>
+                        <button 
+                            onClick=${handleFetchSettingsFromGoogle}
+                            disabled=${fetchingSettings || !settings.googleScriptUrl}
+                            class=${`w-full py-3 rounded-xl font-bold transition-all shadow-lg ${fetchingSettings ? 'bg-green-500 text-white' : settings.googleScriptUrl ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-gray-400 text-white cursor-not-allowed'}`}
+                        >
+                            ${fetchingSettings ? '⏳ Fetching Settings...' : '📥 Fetch Settings from Google'}
+                        </button>
                         <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-                            <p class="text-xs font-bold text-green-800 mb-2">👨‍🏫 How Teachers Use This:</p>
+                            <p class="text-xs font-bold text-green-800 mb-2">� Fetch Settings:</p>
+                            <p class="text-[10px] text-green-700">After connecting your Google Sheet URL, click <b>Fetch Settings from Google</b> to immediately download your school name, fee structures, and settings to this system.</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-xl border border-green-200">
+                            <p class="text-xs font-bold text-green-800 mb-2">�👨‍🏫 How Teachers Use This:</p>
                             <p class="text-[10px] text-green-700">1. Teachers open the Google Sheet on their phone</p>
                             <p class="text-[10px] text-green-700">2. They add/edit scores in the Assessments tab</p>
                             <p class="text-[10px] text-green-700">3. Admin clicks "Sync" button here to get all data</p>
