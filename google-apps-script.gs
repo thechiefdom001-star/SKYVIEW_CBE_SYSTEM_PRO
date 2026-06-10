@@ -74,7 +74,7 @@ var RATE_LIMIT_STORAGE = {
 };
 
 // Column headers for each sheet
-const STUDENT_HEADERS = ['id', 'name', 'grade', 'stream', 'admissionNo', 'admissionDate', 'upiNo', 'assessmentNo', 'parentContact', 'category', 'previousArrears', 'selectedFees', 'religion'];
+const STUDENT_HEADERS = ['id', 'name', 'grade', 'stream', 'admissionNo', 'admissionDate', 'upiNo', 'assessmentNo', 'parentContact', 'category', 'previousArrears', 'selectedFees', 'religion', 'portraitUrl'];
 const ASSESSMENT_HEADERS = ['id', 'studentId', 'studentAdmissionNo', 'studentName', 'grade', 'subject', 'score', 'term', 'examType', 'academicYear', 'date', 'level', 'rawScore', 'maxScore'];
 const ATTENDANCE_HEADERS = ['id', 'studentId', 'date', 'status', 'term', 'academicYear'];
 const TEACHER_HEADERS = ['id', 'name', 'contact', 'subjects', 'grades', 'employeeNo', 'nssfNo', 'shifNo', 'taxNo', 'isClassTeacher', 'classTeacherGrade'];
@@ -2132,7 +2132,7 @@ function sanitizeRecord(record) {
   const stringFields = ['id', 'name', 'grade', 'stream', 'admissionNo', 'admissionDate', 'upiNo', 'assessmentNo', 'parentContact', 'selectedFees', 
                         'subject', 'term', 'examType', 'academicYear', 'date', 'level', 'status',
                         'receiptNo', 'method', 'reference', 'role', 'employeeNo', 'nssfNo', 'shifNo', 'taxNo',
-                        'voided', 'voidedBy', 'studentId', 'studentAdmissionNo', 'studentName', 'category', 'previousArrears', 'rawScore', 'maxScore', 'religion'];
+                        'voided', 'voidedBy', 'studentId', 'studentAdmissionNo', 'studentName', 'category', 'previousArrears', 'rawScore', 'maxScore', 'religion', 'portraitUrl'];
   
   const numericFields = ['score', 'amount'];
   
@@ -2285,8 +2285,8 @@ function doGet(e) {
     
     // Handle addStudent via GET - with fallback for direct parameters
     if (action === 'addStudent') {
-      let student = postData.student;
-      
+      let student = postData.student || postData.record; // Support both keys
+
       // Fallback: if postData parsing failed, try reading from direct parameters
       if (!student && e?.parameter?.student) {
         try {
@@ -2295,11 +2295,26 @@ function doGet(e) {
           try { student = JSON.parse(e.parameter.student); } catch (err2) {}
         }
       }
-      
+
+      console.log('[Script] addStudent - Student data received:', student ? 'YES' : 'NO');
+      console.log('[Script] addStudent - Student name:', student?.name);
+      console.log('[Script] addStudent - Student ID:', student?.id);
+      console.log('[Script] addStudent - Portrait URL:', student?.portraitUrl || student?.portrait);
+
       if (student) {
-        console.log('[Script] Adding student:', student.name, student.id);
+        // Ensure student has ID
+        if (!student.id && student.admissionNo) student.id = student.admissionNo;
+
+        // Handle portrait field mapping - ensure portraitUrl is set
+        if (!student.portraitUrl && student.portrait) {
+          student.portraitUrl = student.portrait;
+          console.log('[Script] Mapped portrait to portraitUrl');
+        }
+
+        console.log('[Script] Adding/Updating student:', student.name, student.id);
         response = addRecord(SHEET_NAMES.STUDENTS, student, STUDENT_HEADERS,
           e?.parameter?.userId, e?.parameter?.userName, e?.parameter?.userRole);
+        console.log('[Script] addRecord response:', response);
         return createJsonResponse(response);
       } else {
         console.log('[Script] ERROR: No student data found');
@@ -2360,7 +2375,22 @@ function doGet(e) {
         e?.parameter?.userId, e?.parameter?.userName, e?.parameter?.userRole);
       return createJsonResponse(response);
     }
-    
+
+    // Handle photo gallery records via GET (stored in Calendar sheet with type='photo_gallery')
+    if (action === 'addPhotoGallery' && postData) {
+      const photoRecord = postData;
+      if (!photoRecord.id) {
+        photoRecord.id = 'PHOTO-' + Date.now();
+      }
+      if (!photoRecord.updatedAt) {
+        photoRecord.updatedAt = new Date().toISOString();
+      }
+      console.log('[Script] addPhotoGallery - Photo for student:', photoRecord.studentId, photoRecord.name);
+      response = addRecord(SHEET_NAMES.CALENDAR, photoRecord, CALENDAR_HEADERS,
+        e?.parameter?.userId, e?.parameter?.userName, e?.parameter?.userRole);
+      return createJsonResponse(response);
+    }
+
     // Handle generic addRecord via GET
     if (action === 'addRecord') {
       const sheetName = postData.sheetName;
@@ -3038,8 +3068,17 @@ function doPost(e) {
     
     switch (action) {
       case 'addStudent':
+        console.log('[POST] addStudent - Student name:', data.student?.name);
+        console.log('[POST] addStudent - Student ID:', data.student?.id);
+        console.log('[POST] addStudent - Portrait URL:', data.student?.portraitUrl || data.student?.portrait);
+        // Handle portrait field mapping - ensure portraitUrl is set
+        if (!data.student.portraitUrl && data.student.portrait) {
+          data.student.portraitUrl = data.student.portrait;
+          console.log('[POST] Mapped portrait to portraitUrl');
+        }
         response = addRecord(SHEET_NAMES.STUDENTS, data.student, STUDENT_HEADERS,
           data.userId, data.userName, data.userRole);
+        console.log('[POST] addRecord response:', response);
         break;
         
       case 'updateStudent':

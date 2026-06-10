@@ -73,7 +73,7 @@ export const ParentsDashboard = ({ data, parentSession, setData }) => {
 
     const renderOverview = () => html`
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Student Profile Card -->
+            
             <div class="bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-3xl p-6 text-white shadow-xl">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl">👤</div>
@@ -94,7 +94,7 @@ export const ParentsDashboard = ({ data, parentSession, setData }) => {
                 </div>
             </div>
 
-            <!-- Fees Summary -->
+            
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -114,7 +114,7 @@ export const ParentsDashboard = ({ data, parentSession, setData }) => {
                 </button>
             </div>
 
-            <!-- Results Summary -->
+            
             <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-xl border border-slate-100 dark:border-slate-800">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -132,7 +132,7 @@ export const ParentsDashboard = ({ data, parentSession, setData }) => {
             </div>
         </div>
 
-        <!-- Recent Payments -->
+        
         <section class="mt-10">
             <h4 class="text-lg font-black text-slate-900 dark:text-white mb-6 flex items-center gap-2">
                 <span class="bg-indigo-600 w-2 h-2 rounded-full"></span> Recent Fee Payments

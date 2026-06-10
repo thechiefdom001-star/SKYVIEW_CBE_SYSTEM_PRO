@@ -141,24 +141,69 @@ export const Teachers = ({ data = {}, setData = () => {} }) => {
             return;
         }
 
-        setSyncStatus('Checking for remote deletions...');
+        setSyncStatus('Syncing from Google Sheet...');
         googleSheetSync.setSettings(data.settings);
         
         try {
-            const deletionInfo = await googleSheetSync.detectDeletions('Teachers', data.teachers || []);
+            // Fetch all data from Google Sheet
+            const fetchResult = await googleSheetSync.fetchAll();
             
-            if (deletionInfo.deletionCount > 0) {
-                const updatedTeachers = data.teachers.filter(t => !deletionInfo.deletedIds.includes(String(t.id)));
-                setData({ ...data, teachers: updatedTeachers });
-                setSyncStatus(`✓ Synced! Removed ${deletionInfo.deletionCount} deleted teacher(s)`);
+            if (fetchResult.success && fetchResult.teachers) {
+                const googleTeachers = fetchResult.teachers;
+                const localTeachers = data.teachers || [];
+                
+                // Create a map of local teachers by ID for easy lookup
+                const localTeacherMap = new Map(localTeachers.map(t => [String(t.id), t]));
+                
+                // Merge: Keep local teachers, add new ones from Google, update existing ones
+                const mergedTeachers = [...localTeachers];
+                let addedCount = 0;
+                let updatedCount = 0;
+                
+                googleTeachers.forEach(googleTeacher => {
+                    const googleId = String(googleTeacher.id);
+                    if (localTeacherMap.has(googleId)) {
+                        // Update existing teacher if Google has newer data
+                        const localTeacher = localTeacherMap.get(googleId);
+                        const index = mergedTeachers.findIndex(t => String(t.id) === googleId);
+                        if (index !== -1) {
+                            mergedTeachers[index] = { ...localTeacher, ...googleTeacher };
+                            updatedCount++;
+                        }
+                    } else {
+                        // Add new teacher from Google
+                        mergedTeachers.push(googleTeacher);
+                        addedCount++;
+                    }
+                });
+                
+                // Check for deletions
+                const deletionInfo = await googleSheetSync.detectDeletions('Teachers', mergedTeachers);
+                if (deletionInfo.deletionCount > 0) {
+                    const finalTeachers = mergedTeachers.filter(t => !deletionInfo.deletedIds.includes(String(t.id)));
+                    setData({ ...data, teachers: finalTeachers });
+                    setSyncStatus(`✓ Synced! Added ${addedCount}, Updated ${updatedCount}, Removed ${deletionInfo.deletionCount}`);
+                } else {
+                    setData({ ...data, teachers: mergedTeachers });
+                    setSyncStatus(`✓ Synced! Added ${addedCount}, Updated ${updatedCount}`);
+                }
             } else {
-                setSyncStatus('✓ No remote changes detected');
+                // Fallback to just checking deletions if fetch fails
+                const deletionInfo = await googleSheetSync.detectDeletions('Teachers', data.teachers || []);
+                
+                if (deletionInfo.deletionCount > 0) {
+                    const updatedTeachers = data.teachers.filter(t => !deletionInfo.deletedIds.includes(String(t.id)));
+                    setData({ ...data, teachers: updatedTeachers });
+                    setSyncStatus(`✓ Synced! Removed ${deletionInfo.deletionCount} deleted teacher(s)`);
+                } else {
+                    setSyncStatus('✓ No remote changes detected');
+                }
             }
             
             setTimeout(() => setSyncStatus(''), 3000);
         } catch (error) {
             console.error('Sync error:', error);
-            setSyncStatus('⚠ Sync check failed - please try again');
+            setSyncStatus('⚠ Sync failed - please try again');
             setTimeout(() => setSyncStatus(''), 3000);
         }
     };
@@ -305,7 +350,7 @@ export const Teachers = ({ data = {}, setData = () => {} }) => {
                 </form>
             `}
 
-            <!-- Print Header -->
+            
             <div class="hidden print:flex flex-col items-center text-center border-b pb-2 mb-2">
                 <img src="${data.settings.schoolLogo}" class="w-12 h-12 mb-1 object-contain" alt="Logo" />
                 <h1 class="text-xl font-black uppercase text-slate-900">${data.settings.schoolName}</h1>
@@ -367,7 +412,7 @@ export const Teachers = ({ data = {}, setData = () => {} }) => {
                             `)}
                             ${teachers.length === 0 ? html`<tr><td colspan="6" class="p-12 text-center text-slate-300">No teachers registered yet.</td></tr>` : ''}
                         </tbody>
-                        <!-- Print view: All teachers (hidden on screen, visible in print) -->
+                        
                         <tbody class="divide-y divide-slate-50 teachers-print-rows" style="display:none">
                             ${teachers.map(t => html`
                                 <tr key=${t.id} class="hover:bg-slate-100 transition-colors even:bg-slate-50">
@@ -444,7 +489,7 @@ export const Teachers = ({ data = {}, setData = () => {} }) => {
                 </div>
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>

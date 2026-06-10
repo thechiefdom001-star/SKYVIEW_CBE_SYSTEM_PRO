@@ -188,7 +188,7 @@ export const Marklist = ({ data = {}, setData = () => { }, isAdmin, teacherSessi
                             <th class="px-4 py-3 text-[10px] font-bold text-slate-500 uppercase text-center">Remarks</th>
                         </tr>
                     </thead>
-                    <!-- Screen tbody: paginated rows only -->
+                    
                     <tbody class="divide-y divide-slate-100 marklist-screen-rows">
                         ${paginatedStudents.map(student => {
         const remark = remarksList.find(r => r.studentId === student.id) || { teacher: '', principal: '' };
@@ -296,7 +296,7 @@ export const Marklist = ({ data = {}, setData = () => { }, isAdmin, teacherSessi
                             `;
     })}
                     </tbody>
-                    <!-- Print tbody: ALL students, hidden on screen, shown during print -->
+                    
                     <tbody class="marklist-print-rows" style="display:none">
                         ${classStudents.map(student => {
         const remark = remarksList.find(r => r.studentId === student.id) || { teacher: '', principal: '' };
@@ -494,7 +494,7 @@ export const Marklist = ({ data = {}, setData = () => { }, isAdmin, teacherSessi
                 </div>
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${settings.schoolName} - ${settings.schoolAddress}</span>

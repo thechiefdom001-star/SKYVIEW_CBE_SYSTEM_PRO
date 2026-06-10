@@ -190,7 +190,7 @@ export const FeesRegister = ({ data }) => {
                                 <th class="px-6 py-4 text-right">Arrears</th>
                             </tr>
                         </thead>
-                        <!-- Screen view: paginated rows -->
+                        
                         <tbody class="divide-y divide-slate-100 print:hidden">
                             ${paginatedData.map((s, i) => html`
                                 <tr key=${s.id} class="hover:bg-slate-50 transition-colors">
@@ -216,7 +216,7 @@ export const FeesRegister = ({ data }) => {
                                 <tr><td colspan="7" class="p-12 text-center text-slate-300">No student records found matching filters.</td></tr>
                             `}
                         </tbody>
-                        <!-- Print view: all filtered rows -->
+                        
                         <tbody class="divide-y divide-slate-100 hidden print:table-row-group">
                             ${filteredData.map((s, i) => html`
                                 <tr key=${s.id} class="even:bg-slate-50">
@@ -263,7 +263,7 @@ export const FeesRegister = ({ data }) => {
                     `}
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${settings.schoolName} - ${settings.schoolAddress}</span>

@@ -170,7 +170,7 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
 
     return html`
         <div class="bg-white rounded-xl border border-slate-100 overflow-hidden">
-            <!-- Header -->
+            
             <div class="bg-gradient-to-r from-slate-800 to-slate-700 text-white p-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
@@ -199,7 +199,7 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
                 </div>
             </div>
 
-            <!-- Stats Summary -->
+            
             ${stats && html`
                 <div class="grid grid-cols-4 gap-2 p-3 bg-slate-50 border-b">
                     <div class="text-center">
@@ -221,7 +221,7 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
                 </div>
             `}
 
-            <!-- Filters -->
+            
             <div class="flex gap-1 p-2 border-b overflow-x-auto">
                 <button
                     onClick=${() => setFilter('all')}
@@ -243,7 +243,7 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
                 `)}
             </div>
 
-            <!-- Activity List -->
+            
             <div class="max-h-[400px] overflow-y-auto">
                 ${loading ? html`
                     <div class="flex items-center justify-center py-12">
@@ -259,12 +259,12 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
                     <div class=${`flex items-start gap-3 p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors ${
                         index === 0 ? 'bg-blue-50/50' : ''
                     }`}>
-                        <!-- Icon -->
+                        
                         <div class=${`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${getActionColor(activity.action)}`}>
                             ${getActionIcon(activity.action)}
                         </div>
 
-                        <!-- Content -->
+                        
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class=${`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${getActionColor(activity.action)}`}>
@@ -294,7 +294,7 @@ export const ActivityLog = ({ settings, isAdmin, teacherSession, limit = 20 }) =
                 `)}
             </div>
 
-            <!-- Footer -->
+            
             ${activities.length > 0 && html`
                 <div class="p-2 bg-slate-50 text-center">
                     <p class="text-[10px] text-slate-400">

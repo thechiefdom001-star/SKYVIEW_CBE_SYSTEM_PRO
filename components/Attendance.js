@@ -446,7 +446,7 @@ export const Attendance = ({ data, setData, isAdmin, teacherSession, allowedGrad
                             </button>
                         </div>
 
-                        <!-- Print Footer -->
+                        
                         <div class="print:block hidden mt-6 pt-3 border-t border-slate-200">
                             <div class="flex justify-between items-center text-[8px] text-slate-400">
                                 <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>

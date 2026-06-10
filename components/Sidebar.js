@@ -14,8 +14,7 @@ export const Sidebar = ({ currentView, setView, isCollapsed, setCollapsed, isMob
         );
     };
 
-    // Define which items require admin vs teacher access
-    const adminOnlyItems = new Set(['settings', 'fees', 'fees-register', 'fee-reminder', 'payroll', 'teachers', 'staff', 'senior-school', 'library', 'archives']);
+  const adminOnlyItems = new Set(['settings', 'fees', 'fees-register', 'fee-reminder', 'payroll', 'teachers', 'staff', 'senior-school', 'library', 'archives', 'school-analysis', 'strategic-reports', 'strategic-presentation']);
     if (!isAdmin && teacherSession?.role !== 'class_teacher' && teacherSession?.role !== 'head_teacher' && teacherSession?.role !== 'admin') {
         adminOnlyItems.add('students');
     }
@@ -35,10 +34,8 @@ export const Sidebar = ({ currentView, setView, isCollapsed, setCollapsed, isMob
             return;
         }
 
-        // Check if item requires login
-        if (!isAuthenticated) {
-            // Show locked state briefly
-            setLockedItems(prev => new Set([...prev, id]));
+          if (!isAuthenticated) {
+                  setLockedItems(prev => new Set([...prev, id]));
             setTimeout(() => {
                 setLockedItems(prev => {
                     const next = new Set(prev);
@@ -47,8 +44,7 @@ export const Sidebar = ({ currentView, setView, isCollapsed, setCollapsed, isMob
                 });
             }, 500);
             
-            // Open relevant auth modal
-            if (parentAccessItems.has(id)) {
+                  if (parentAccessItems.has(id)) {
                 if (onOpenParentAuth) onOpenParentAuth();
             } else {
                 if (onOpenAuth) onOpenAuth();
@@ -56,8 +52,7 @@ export const Sidebar = ({ currentView, setView, isCollapsed, setCollapsed, isMob
             return;
         }
 
-        // Check admin-only items
-        if (adminOnlyItems.has(id) && !isAdmin) {
+          if (adminOnlyItems.has(id) && !isAdmin) {
             alert('This feature requires Administrator access. Please login as Admin.');
             return;
         }
@@ -133,6 +128,9 @@ export const Sidebar = ({ currentView, setView, isCollapsed, setCollapsed, isMob
                 { id: 'staff', label: 'Support Staff', icon: '🛠️', adminOnly: true },
                 { id: 'transport', label: 'Transport', icon: '🚌' },
                 { id: 'library', label: 'Library', icon: '📚' },
+                { id: 'school-analysis', label: 'School Analysis', icon: '📊', adminOnly: true },
+                { id: 'strategic-reports', label: 'Strategic Reports', icon: '📜', adminOnly: true },
+                { id: 'strategic-presentation', label: 'Slides Presentation', icon: '📽️', adminOnly: true },
                 { id: 'archives', label: 'Archives', icon: '🗄️' },
             ]
         },

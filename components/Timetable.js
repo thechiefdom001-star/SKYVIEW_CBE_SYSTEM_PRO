@@ -294,7 +294,7 @@ export const Timetable = ({ data, setData, isAdmin, teacherSession }) => {
             `}
 
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden print:border-black print:rounded-none">
-                <!-- Printable Header -->
+                
                 <div class="p-6 border-b bg-slate-50 text-center space-y-1 print:bg-white print:border-black">
                     <h1 class="text-xl font-black uppercase text-slate-900">${data.settings.schoolName}</h1>
                     <div class="flex justify-center items-center gap-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
@@ -306,7 +306,7 @@ export const Timetable = ({ data, setData, isAdmin, teacherSession }) => {
                     </div>
                 </div>
 
-                <!-- Print Header -->
+                
                 <div class="hidden print:flex flex-col items-center text-center border-b pb-2 mb-2">
                     <img src="${data.settings.schoolLogo}" class="w-12 h-12 mb-1 object-contain" alt="Logo" />
                     <h1 class="text-xl font-black uppercase text-slate-900">${data.settings.schoolName}</h1>
@@ -318,7 +318,7 @@ export const Timetable = ({ data, setData, isAdmin, teacherSession }) => {
                 
                 <div class="timetable-container overflow-x-auto no-scrollbar">
                     <div class=${`min-w-[${Math.max(800, slots.length * 100)}px] border-l border-t print:border-black`}>
-                        <!-- Time Header Row -->
+                        
                         <div class="flex bg-slate-100 border-b print:bg-white print:border-black">
                             ${viewType === 'master' ? html`
                                 <div class="w-24 p-3 border-r font-black text-[10px] text-slate-400 uppercase bg-slate-50 print:border-black">Day</div>
@@ -333,7 +333,7 @@ export const Timetable = ({ data, setData, isAdmin, teacherSession }) => {
                             `)}
                         </div>
 
-                        <!-- Content Rows -->
+                        
                         ${viewType !== 'master' ? 
                             days.map(day => html`
                                 <div class="flex">
@@ -380,7 +380,7 @@ export const Timetable = ({ data, setData, isAdmin, teacherSession }) => {
                 </p>
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>

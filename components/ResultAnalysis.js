@@ -208,8 +208,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Filters -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 no-print">
+	            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 no-print">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Year</label>
                     <select 
@@ -283,8 +282,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Analysis Print Header - appears first on page 1 -->
-            <div class="print-only mb-6 flex flex-col items-center text-center">
+	            <div class="print-only mb-6 flex flex-col items-center text-center">
                 <img src="${data.settings.schoolLogo}" class="w-16 h-16 mb-2 object-contain" />
                 <h1 class="text-2xl font-black uppercase">${data.settings.schoolName}</h1>
                 <h2 class="text-sm font-bold uppercase text-slate-500 mt-1">Academic Performance Analysis - ${filterTerm === 'FULL' ? 'Full Year' : filterTerm} (${filterGrade})</h2>
@@ -295,8 +293,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Top 10 Best Students - Screen Only -->
-            <div class="no-print bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-white shadow-xl">
+	            <div class="no-print bg-gradient-to-br from-blue-600 to-indigo-700 p-6 rounded-2xl text-white shadow-xl">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="text-3xl">🏆</span>
                     <div>
@@ -326,8 +323,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Top Performers - Print Section -->
-            <div class="print-only mb-8 border-4 border-blue-700 p-6 bg-blue-50">
+	            <div class="print-only mb-8 border-4 border-blue-700 p-6 bg-blue-50">
                 <div class="text-center mb-6 pb-4 border-b-2 border-blue-700">
                     <h2 class="text-2xl font-black uppercase text-blue-900 mb-1">🏆 TOP PERFORMERS 🏆</h2>
                     <p class="text-sm font-bold text-blue-700 uppercase tracking-widest">
@@ -363,8 +359,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Analysis Table Sub-Header (page break before detailed table) -->
-            <div class="print-only mb-4 text-center">
+	            <div class="print-only mb-4 text-center">
                 <h2 class="text-sm font-bold uppercase text-slate-600">Detailed Student Score Table — ${filterGrade} | ${filterTerm === 'FULL' ? 'Full Year' : filterTerm} (${filterYear})</h2>
             </div>
 
@@ -454,6 +449,25 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                         `)}
                     </tbody>
                     <tfoot class="bg-slate-50 border-t-2 border-slate-200">
+                        <tr class="font-bold text-[9px] text-slate-500 bg-white">
+                            <td class="px-4 py-2 border-r sticky left-0 bg-white z-10 uppercase">Subject Teacher</td>
+                            ${subjects.filter(s => filterSubject === 'ALL' || s === filterSubject).map(subject => {
+            const currentGradeWithStream = filterGrade + (filterStream !== 'ALL' ? filterStream : '');
+            const teacherRecord = (data.teachers || []).find(t => {
+                const tSubjects = (t.subjects || '').toLowerCase().split(',').map(s => s.trim());
+                const tGrades = (t.grades || '').toLowerCase().split(',').map(g => g.trim());
+                return tSubjects.some(ts => subject.toLowerCase().includes(ts) || ts.includes(subject.toLowerCase())) &&
+                    tGrades.some(tg => currentGradeWithStream.toLowerCase().includes(tg) || tg.includes(currentGradeWithStream.toLowerCase()));
+            });
+            return html`
+                                    <td class="px-2 py-2 border-r text-center italic">
+                                        ${teacherRecord ? teacherRecord.name : 'Unassigned'}
+                                    </td>
+                                `;
+        })}
+                            <td class="bg-white"></td>
+                            <td class="no-print bg-white"></td>
+                        </tr>
                         <tr class="font-black text-[10px] text-slate-700">
                             <td class="px-4 py-3 border-r sticky left-0 bg-slate-50 z-10 uppercase">Class Mean (Subject Analysis)</td>
                             ${filterTerm !== 'FULL' ? classSubjectAnalysis.map(ca => html`
@@ -488,10 +502,8 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 `}
             </div>
 
-            <!-- Professional Analysis Summary & Charts -->
-            <div class="space-y-6">
-                <!-- Row 1: Distribution & Mean -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+	            <div class="space-y-6">
+	                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print:border-slate-300">
                         <h3 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
                             <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
@@ -539,7 +551,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                     </div>
                 </div>
 
-                <!-- Row 2: Subject-wise Performance Chart (Printable) -->
+                
                 <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm print:border-slate-300">
                     <h3 class="font-black text-xs uppercase tracking-widest text-slate-400 mb-8 flex items-center gap-2">
                         <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
@@ -583,8 +595,7 @@ export const ResultAnalysis = ({ data, onSelectStudent, isAdmin, teacherSession,
                 </div>
             </div>
 
-            <!-- Report Footer -->
-            <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
+	            <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>
                     <span>Academic Year: ${filterYear}</span>

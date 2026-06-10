@@ -191,7 +191,7 @@ export const SeniorSchool = ({ data, setData }) => {
                 <${PrintButtons} />
             </div>
 
-            <!-- Filters -->
+            
             <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Grade Level</label>
@@ -288,7 +288,7 @@ export const SeniorSchool = ({ data, setData }) => {
                 </p>
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>

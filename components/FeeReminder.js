@@ -98,7 +98,7 @@ export const FeeReminder = ({ data }) => {
 
     return html`
         <div class="space-y-6">
-            <!-- Header Section -->
+            
             <div class="bg-gradient-to-r from-[#7FFFD4] via-[#7FFFD4] to-[#7FFFD4] rounded-2xl p-6 text-slate-800 shadow-lg border border-[#5FD3B3]">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div class="flex items-center gap-4">
@@ -120,7 +120,7 @@ export const FeeReminder = ({ data }) => {
                 </div>
             </div>
 
-            <!-- Filters -->
+            
             <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="space-y-2">
@@ -163,7 +163,7 @@ export const FeeReminder = ({ data }) => {
                 </div>
             </div>
 
-            <!-- Empty State -->
+            
             ${filteredStudents.length === 0 && html`
                 <div class="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
                     <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -174,7 +174,7 @@ export const FeeReminder = ({ data }) => {
                 </div>
             `}
             
-            <!-- Fee Reminder Cards -->
+            
             ${filteredStudents.map((student) => {
                 const finance = calculateArrears(student);
                 const dueItems = finance.items.filter(item => {
@@ -185,7 +185,7 @@ export const FeeReminder = ({ data }) => {
                 
                 return html`
                     <div class="reminder-document">
-                        <!-- Document Header -->
+                        
                         <div class="doc-header">
                             <div class="school-info">
                                 ${settings.schoolLogo && html`<img src="${settings.schoolLogo}" class="school-logo" />`}
@@ -200,7 +200,7 @@ export const FeeReminder = ({ data }) => {
                             </div>
                         </div>
 
-                        <!-- Report Info -->
+                        
                         <div class="report-info">
                             <div class="info-item">
                                 <span class="info-label">Class</span>
@@ -216,14 +216,14 @@ export const FeeReminder = ({ data }) => {
                             </div>
                         </div>
 
-                        <!-- Notice Title -->
+                        
                         <div class="notice-title">
                             <h2>Official Fee Balance Notice</h2>
                         </div>
 
-                        <!-- Student & Amount Details -->
+                        
                         <div class="student-balance-grid">
-                            <!-- Student Info -->
+                            
                             <div class="student-box">
                                 <div class="box-header">
                                     <span class="box-icon">👤</span>
@@ -242,7 +242,7 @@ export const FeeReminder = ({ data }) => {
                                 </div>
                             </div>
 
-                            <!-- Balance Summary -->
+                            
                             <div class="balance-box">
                                 <div class="box-header">
                                     <span class="box-icon">💰</span>
@@ -262,7 +262,7 @@ export const FeeReminder = ({ data }) => {
                             </div>
                         </div>
 
-                        <!-- Fee Breakdown Table -->
+                        
                         <table class="fee-table">
                             <thead>
                                 <tr>
@@ -294,13 +294,13 @@ export const FeeReminder = ({ data }) => {
                             </tfoot>
                         </table>
 
-                        <!-- Urgent Notice -->
+                        
                         <div class="notice-message">
                             <p><strong>Dear Parent/Guardian,</strong></p>
                             <p>This is a friendly reminder that there is an outstanding balance of <strong class="amount">${settings.currency} ${finance.balance.toLocaleString()}</strong> on your child's school fees account. Please arrange payment at your earliest convenience to avoid interruption of learning services.</p>
                         </div>
 
-                        <!-- Payment Methods -->
+                        
                         ${(settings.bankName || settings.mpesaPaybill || settings.airtelPaybill) && html`
                             <div class="payment-section">
                                 <p class="payment-title">Official Payment Channels</p>
@@ -330,7 +330,7 @@ export const FeeReminder = ({ data }) => {
                             </div>
                         `}
 
-                        <!-- Signatures -->
+                        
                         <div class="signatures">
                             <div class="sig-box">
                                 <div class="sig-line">
@@ -350,7 +350,7 @@ export const FeeReminder = ({ data }) => {
                 `;
             })}
 
-            <!-- Print Styles -->
+            
             <style>${`
                 /* Document Styles - Print Ready */
                 .reminder-document {

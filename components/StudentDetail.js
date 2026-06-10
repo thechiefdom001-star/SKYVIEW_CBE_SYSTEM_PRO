@@ -166,16 +166,36 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
             `}
             
             <div class=${`bg-white p-6 rounded-2xl shadow-sm border border-slate-100 print:border-0 print:shadow-none print:p-0 student-report-sheet ${isBatch ? '' : ''}`}>
-                <div class="hidden print:flex flex-col items-center text-center border-b pb-2 mb-2">
-                    <img src="${settings.schoolLogo}" class="w-12 h-12 mb-1 object-contain" alt="Logo" />
-                    <h1 class="text-xl font-black uppercase text-slate-900">${settings.schoolName}</h1>
-                    <p class="text-[10px] text-slate-500 font-medium">${settings.schoolAddress}</p>
-                    <div class="mt-2 border-t border-slate-200 w-full pt-2">
-                        <h2 class="text-sm font-extrabold uppercase tracking-widest text-blue-600">${isFullYear ? 'Annual Comprehensive Report' : 'Progressive Student Report - ' + selectedTerm.replace('T', 'Term ')}</h2>
+                
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b pb-4 print:border-b-2 print:border-black print:pb-3 print:flex-row">
+                    
+                    <div class="flex-shrink-0 print:w-24 print:h-24">
+                        <img src="${settings.schoolLogo}" class="w-20 h-20 md:w-24 md:h-24 object-contain print:w-24 print:h-24" alt="School Logo" />
+                    </div>
+                    
+                    
+                    <div class="flex-1 text-center print:text-center print:flex-1">
+                        <h1 class="text-xl md:text-2xl font-black uppercase text-slate-900 leading-tight print:text-xl">${settings.schoolName}</h1>
+                        <p class="text-[10px] md:text-xs text-slate-500 font-medium mt-1 print:text-xs">${settings.schoolAddress}</p>
+                        <div class="mt-2 border-t border-slate-200 w-full pt-2 print:border-black print:mt-2 print:pt-2">
+                            <h2 class="text-sm font-extrabold uppercase tracking-widest text-blue-600 print:text-sm">${isFullYear ? 'Annual Comprehensive Report' : 'Progressive Student Report - ' + selectedTerm.replace('T', 'Term ')}</h2>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="flex-shrink-0 print:w-24 print:h-24">
+                        ${(student.portrait || student.portraitUrl) ? html`
+                            <img src=${student.portrait || student.portraitUrl} class="w-20 h-20 md:w-24 md:h-24 rounded-lg object-cover border-2 border-slate-200 print:border-black print:w-24 print:h-24 print:rounded-lg print:object-cover" alt="Student Portrait" />
+                        ` : html`
+                            <div class="w-20 h-20 md:w-24 md:h-24 rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 print:w-24 print:h-24 print:rounded-lg print:border-2 print:border-dashed print:border-slate-300">
+                                <span class="text-3xl">👤</span>
+                            </div>
+                        `}
                     </div>
                 </div>
 
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b pb-2 print:border-b-2 print:border-black">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-2 border-b pb-2 print:border-b-2 print:border-black mt-4">
                     <div class="w-full">
                         <h2 class="text-xl font-black border-b border-slate-100 pb-1 mb-1">${student.name}</h2>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1 text-slate-500 text-[10px]">
@@ -249,7 +269,7 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                 </div>
 
                 ${isFullYear ? html`
-                    <!-- Full Year Report -->
+                    
                     <div class="mt-4 print:mt-2">
                         <div class="border rounded-xl overflow-hidden print:border-black print:rounded-none overflow-x-auto no-scrollbar">
                             <table class="w-full text-left student-report-table">
@@ -344,7 +364,7 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                         </div>
                     </div>
                 ` : html`
-                    <!-- Termly Report -->
+                    
                     <div class="mt-4 print:mt-2">
                         <div class="border rounded-xl overflow-hidden print:border-black print:rounded-none overflow-x-auto no-scrollbar">
                             <table class="w-full text-left student-report-table">
@@ -356,7 +376,8 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                                         <th class="p-2 print:p-1.5 text-center border-l">End</th>
                                         <th class="p-2 print:p-1.5 text-center border-l bg-blue-50 text-blue-700">Average</th>
                                         <th class="p-2 print:p-1.5 text-center border-l">Level</th>
-                                        <th class="p-2 print:p-1.5 text-center border-l font-black">Pts</th>
+                                        <th class="p-2 print:p-1.5 text-center border-l">Teacher</th>
+                                        <th class="p-2 print:p-1.5 text-center border-l min-w-[120px]">AI Comment</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y print:divide-black">
@@ -373,18 +394,38 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                     : null;
 
                 const gradeInfo = average !== null ? Storage.getGradeInfo(average) : null;
+                
+                // Find registered teacher for this subject and class
+                const currentGradeWithStream = student.grade + (student.stream || '');
+                const teacherRecord = (data.teachers || []).find(t => {
+                    const tSubjects = (t.subjects || '').toLowerCase().split(',').map(s => s.trim());
+                    const tGrades = (t.grades || '').toLowerCase().split(',').map(g => g.trim());
+                    return tSubjects.some(ts => subject.toLowerCase().includes(ts) || ts.includes(subject.toLowerCase())) &&
+                           tGrades.some(tg => currentGradeWithStream.toLowerCase().includes(tg) || tg.includes(currentGradeWithStream.toLowerCase()));
+                });
+
+                // Generate AI Comment based on performance
+                const getAiComment = (avg) => {
+                    if (avg === null) return '-';
+                    if (avg >= 80) return 'Exemplary performance. Consistent mastery demonstrated.';
+                    if (avg >= 70) return 'Very good progress. Maintaining high standards.';
+                    if (avg >= 60) return 'Good effort. Solid understanding of concepts.';
+                    if (avg >= 50) return 'Steady progress. Scope for further improvement.';
+                    if (avg >= 40) return 'Developing. Requires additional support and practice.';
+                    return 'Needs intensive intervention and focused study.';
+                };
 
                 return html`
                                             <tr class="print:break-inside-avoid hover:bg-slate-50 border-b print:border-black last:border-0">
-                                                <td class="p-2 print:p-1.5 font-bold text-slate-800 print:text-[11px]">
+                                                <td class="p-2 print:p-1.5 font-bold text-slate-800 print:text-[10px]">
                                                     ${subject}
                                                 </td>
-                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[11px]">${scores['Opener'] ?? '-'}</td>
-                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[11px]">${scores['Mid-Term'] ?? '-'}</td>
-                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[11px]">${scores['End-Term'] ?? '-'}</td>
-                                                <td class="p-2 print:p-1.5 text-center font-black text-blue-600 border-l bg-blue-50/30 print:text-[11px]">${average !== null ? average + '%' : '-'}</td>
+                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[10px]">${scores['Opener'] ?? '-'}</td>
+                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[10px]">${scores['Mid-Term'] ?? '-'}</td>
+                                                <td class="p-2 print:p-1.5 text-center text-slate-500 border-l font-medium print:text-[10px]">${scores['End-Term'] ?? '-'}</td>
+                                                <td class="p-2 print:p-1.5 text-center font-black text-blue-600 border-l bg-blue-50/30 print:text-[10px]">${average !== null ? average + '%' : '-'}</td>
                                                 <td class="p-2 print:p-1.5 text-center border-l">
-                                                    <span class=${`px-2 py-0.5 rounded-full text-[9px] font-black uppercase ${gradeInfo && gradeInfo.level !== '-' ? (
+                                                    <span class=${`px-2 py-0.5 rounded-full text-[8px] font-black uppercase ${gradeInfo && gradeInfo.level !== '-' ? (
                         gradeInfo.level.startsWith('EE') ? 'bg-green-100 text-green-700' :
                             gradeInfo.level.startsWith('ME') ? 'bg-blue-100 text-blue-700' :
                                 gradeInfo.level.startsWith('AE') ? 'bg-yellow-100 text-yellow-700' :
@@ -394,8 +435,11 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                                                         ${gradeInfo ? gradeInfo.level : '-'}
                                                     </span>
                                                 </td>
-                                                <td class="p-2 print:p-1.5 text-center border-l font-black text-slate-700 print:text-[11px]">
-                                                    ${gradeInfo ? gradeInfo.points : '-'}
+                                                <td class="p-2 print:p-1.5 text-center border-l text-[9px] font-medium text-slate-600">
+                                                    ${teacherRecord ? teacherRecord.name : '-'}
+                                                </td>
+                                                <td class="p-2 print:p-1.5 text-left border-l text-[9px] italic text-slate-500 leading-tight">
+                                                    ${getAiComment(average)}
                                                 </td>
                                             </tr>
                                         `;
@@ -412,14 +456,14 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                 }).filter(s => s !== null);
                 if (isSenior && validScores.length > 7) validScores = validScores.sort((a,b) => b-a).slice(0,7);
                 const sum = validScores.reduce((a, b) => a + b, 0);
-                return html`<td class="p-2 print:p-1.5 text-center border-l text-[10px] print:text-[11px]">${sum || '-'}</td>`;
+                return html`<td class="p-2 print:p-1.5 text-center border-l text-[9px] print:text-[10px]">${sum || '-'}</td>`;
             })}
-                                        <td class="p-2 print:p-1.5 text-center border-l bg-blue-50/50 text-blue-700 text-[10px] print:text-[11px]">
+                                        <td class="p-2 print:p-1.5 text-center border-l bg-blue-50/50 text-blue-700 text-[9px] print:text-[10px]">
                                             ${totalMarks || '-'}
                                         </td>
-                                        <td class="p-2 print:p-1.5 text-center border-l font-black text-blue-700 print:text-[11px]">${overallLevel}</td>
-                                        <td class="p-2 print:p-1.5 text-center border-l font-black text-slate-700 print:text-[11px]">
-                                            ${validAveragesForOverall.reduce((sum, avg) => sum + (Storage.getGradeInfo(avg)?.points || 0), 0) || '-'}
+                                        <td class="p-2 print:p-1.5 text-center border-l font-black text-blue-700 print:text-[10px]">${overallLevel}</td>
+                                        <td class="p-2 print:p-1.5 text-center border-l font-black text-slate-700 print:text-[10px]" colspan="2">
+                                            OVERALL PERFORMANCE
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -428,69 +472,161 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                     </div>
                 `}
 
-                <!-- Graphical Performance Analysis -->
-                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 print:mt-2">
-                    <!-- Subject-wise Performance Chart -->
+                
+                <div class="mt-4 print:mt-2">
+                    
                     <div class="p-3 bg-white border border-slate-100 rounded-xl print:border-black print:rounded-none">
-                        <h4 class="text-[9px] font-black uppercase text-slate-500 mb-3 border-b pb-1">Performance by Subject</h4>
-                        <div class="space-y-2">
-                            ${subjects.map((subject, idx) => {
-                                const avg = subjectAverages[idx];
-                                if (avg === null) return null;
-                                const barColor = avg >= 75 ? 'bg-green-500' : avg >= 50 ? 'bg-blue-500' : avg >= 35 ? 'bg-yellow-500' : 'bg-red-500';
-                                return html`
-                                    <div class="space-y-0.5">
-                                        <div class="flex justify-between text-[8px] font-bold uppercase">
-                                            <span class="truncate max-w-[100px]">${subject}</span>
-                                            <span>${avg}%</span>
-                                        </div>
-                                        <div class="h-1.5 bg-slate-50 rounded-full overflow-hidden border border-slate-100 print:border-black flex">
-                                            <div class=${`h-full ${barColor} shadow-inner transition-all duration-1000`} style=${{ width: `${avg}%` }}></div>
-                                        </div>
-                                    </div>
-                                `;
-                            }).filter(n => n !== null)}
-                        </div>
-                    </div>
-
-                    <!-- Termly Performance Growth / Summary -->
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl print:border-black print:rounded-none">
-                        <h4 class="text-[9px] font-black uppercase text-slate-500 mb-3 border-b pb-1">${isFullYear ? 'Termly Trend Analysis' : 'Competency Summary'}</h4>
-                        ${isFullYear ? html`
-                            <div class="flex h-32 items-end justify-around gap-2 px-2 pb-6 pt-2">
-                                ${yearSummary.map(ys => {
-                                    const h = ys.avgScore || 0;
-                                    const barColor = h >= 75 ? 'bg-green-500' : h >= 50 ? 'bg-blue-500' : h >= 35 ? 'bg-yellow-500' : 'bg-red-500';
+                        <h4 class="text-[9px] font-black uppercase text-slate-500 mb-3 border-b pb-1">Performance Trend Analysis</h4>
+                        
+                        <div class="relative h-56 w-full print:h-48">
+                            
+                            <div class="absolute left-0 top-0 bottom-8 w-10 flex flex-col justify-between text-[8px] text-slate-400 font-black">
+                                <span>100%</span>
+                                <span>75%</span>
+                                <span>50%</span>
+                                <span>25%</span>
+                                <span>0%</span>
+                            </div>
+                            
+                            <div class="absolute left-10 right-0 top-0 bottom-8 border-l border-b border-slate-200 print:border-black">
+                                
+                                <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+                                    <div class="border-t border-slate-100 print:border-black/20"></div>
+                                    <div class="border-t border-slate-100 print:border-black/20"></div>
+                                    <div class="border-t border-slate-100 print:border-black/20"></div>
+                                    <div class="border-t border-slate-100 print:border-black/20"></div>
+                                </div>
+                                
+                                <div class="absolute inset-0 pt-2 pb-8 px-4 print:pt-1 print:pb-6 print:px-2">
+                                    ${(() => {
+                                        const getExamScore = (subject, term, examType) => {
+                                            const assessment = (data.assessments || []).find(a => 
+                                                String(a.studentId) === String(student.id) && 
+                                                a.term === term && 
+                                                a.subject === subject &&
+                                                a.examType === examType
+                                            );
+                                            return assessment ? Number(assessment.score) : 0;
+                                        };
+                                        
+                                        // Detect which terms have data
+                                        const hasT1 = subjects.some(subject => 
+                                            ['T1', 'T2', 'T3'].some(term => 
+                                                ['Opener', 'Mid-Term', 'End-Term'].some(examType => 
+                                                    getExamScore(subject, term, examType) > 0
+                                                )
+                                            )
+                                        );
+                                        const hasT2 = subjects.some(subject => 
+                                            ['T2', 'T3'].some(term => 
+                                                ['Opener', 'Mid-Term', 'End-Term'].some(examType => 
+                                                    getExamScore(subject, term, examType) > 0
+                                                )
+                                            )
+                                        );
+                                        const hasT3 = subjects.some(subject => 
+                                            ['Opener', 'Mid-Term', 'End-Term'].some(examType => 
+                                                getExamScore(subject, 'T3', examType) > 0
+                                            )
+                                        );
+                                        
+                                        // Determine available terms and their labels
+                                        const availableTerms = [];
+                                        if (hasT1) availableTerms.push({ term: 'T1', label: 'T1' });
+                                        if (hasT2) availableTerms.push({ term: 'T2', label: 'T2' });
+                                        if (hasT3) availableTerms.push({ term: 'T3', label: 'T3' });
+                                        
+                                        // If no data, default to selected term
+                                        const termsToUse = availableTerms.length > 0 ? availableTerms : [{ term: selectedTerm, label: selectedTerm }];
+                                        
+                                        // Calculate x-positions based on number of terms
+                                        const numTerms = termsToUse.length;
+                                        const pointsPerTerm = 3;
+                                        const totalPoints = numTerms * pointsPerTerm;
+                                        
+                                        // Calculate x-positions evenly distributed
+                                        const xPositions = [];
+                                        const step = 100 / (totalPoints + 1);
+                                        for (let i = 1; i <= totalPoints; i++) {
+                                            xPositions.push(step * i);
+                                        }
+                                        
+                                        // Generate x-axis labels
+                                        const xAxisLabels = [];
+                                        termsToUse.forEach(({ term }) => {
+                                            xAxisLabels.push(`${term}-Opener`);
+                                            xAxisLabels.push(`${term}-Mid`);
+                                            xAxisLabels.push(`${term}-End`);
+                                        });
+                                        
+                                        const termData = subjects.slice(0, 5).map((subject, idx) => {
+                                            let scores = [];
+                                            
+                                            termsToUse.forEach(({ term }) => {
+                                                scores.push(getExamScore(subject, term, 'Opener'));
+                                                scores.push(getExamScore(subject, term, 'Mid-Term'));
+                                                scores.push(getExamScore(subject, term, 'End-Term'));
+                                            });
+                                            
+                                            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                                            const color = colors[idx % colors.length];
+                                            
+                                            return { subject, scores, color };
+                                        }).filter(d => d.scores.some(s => s > 0));
+                                        
+                                        return html`
+                                            
+                                            <div class="absolute -bottom-6 left-0 right-0 flex justify-around text-[7px] font-black uppercase text-slate-500 px-2">
+                                                ${xAxisLabels.map(label => html`<span>${label}</span>`)}
+                                            </div>
+                                            
+                                            <div class="absolute inset-0 pt-2 pb-8 pointer-events-none">
+                                                ${xPositions.map(x => html`
+                                                    <div class="absolute top-0 bottom-8 border-l border-slate-100 print:border-black/10" style=${{ left: `${x}%` }}></div>
+                                                `)}
+                                            </div>
+                                            
+                                            ${termData.map((item, idx) => {
+                                                const yPositions = item.scores.map(s => 100 - s);
+                                                const points = xPositions.map((x, i) => `${x},${yPositions[i]}`).join(' ');
+                                                
+                                                return html`
+                                                    <svg class="absolute inset-0 w-full h-full pointer-events-none print:pointer-events-auto" viewBox="0 0 100 100" preserveAspectRatio="none" style=${{ zIndex: 10 - idx, overflow: 'visible' }}>
+                                                        <polyline
+                                                            points="${points}"
+                                                            fill="none"
+                                                            stroke=${item.color}
+                                                            stroke-width="0.5"
+                                                            vector-effect="non-scaling-stroke"
+                                                        />
+                                                        ${xPositions.map((x, i) => html`
+                                                            <circle cx="${x}" cy="${yPositions[i]}" r="0.8" fill=${item.color} />
+                                                        `)}
+                                                    </svg>
+                                                `;
+                                            })}
+                                        `;
+                                    })()}
+                                </div>
+                            </div>
+                            
+                            <div class="absolute -bottom-14 left-10 right-0 flex flex-wrap gap-2 text-[8px]">
+                                ${subjects.slice(0, 5).map((subject, idx) => {
+                                    const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+                                    const color = colors[idx % colors.length];
                                     return html`
-                                        <div class="flex-1 flex flex-col items-center gap-1 group relative">
-                                            <div class="absolute -top-5 text-[8px] font-black opacity-0 group-hover:opacity-100 transition-opacity">${h}%</div>
-                                            <div class=${`w-full ${barColor} rounded-t-sm shadow-inner transition-all duration-1000`} style=${{ height: `${h}%` }}></div>
-                                            <span class="text-[9px] font-black uppercase text-slate-400">${ys.term}</span>
+                                        <div class="flex items-center gap-1">
+                                            <div class="w-2 h-2 rounded-full" style=${{ backgroundColor: color }}></div>
+                                            <span class="font-bold text-slate-600">${subject}</span>
                                         </div>
                                     `;
                                 })}
                             </div>
-                        ` : html`
-                            <div class="flex flex-col h-full justify-center space-y-3 pb-2">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center text-lg shadow-lg">📈</div>
-                                    <div>
-                                        <p class="text-[8px] font-black text-slate-400 uppercase">Growth Rating</p>
-                                        <p class="text-xs font-bold">${overallPercentage >= 75 ? 'Consistent Excellence' : overallPercentage >= 50 ? 'Strong Potential' : 'Room for Improvement'}</p>
-                                    </div>
-                                </div>
-                                <div class="p-2 bg-slate-50 rounded-lg border border-slate-100">
-                                    <p class="text-[8px] font-black text-slate-400 uppercase mb-1">Key Insight</p>
-                                    <p class="text-[10px] leading-tight italic">
-                                        Following current trends, the student is currently <strong>${overallLevel}</strong> expectations with a deviation of <strong>${Math.abs(50 - overallPercentage)}%</strong> from the mean target.
-                                    </p>
-                                </div>
-                            </div>
-                        `}
+                        </div>
                     </div>
                 </div>
 
-                <!-- Teacher Remarks Section -->
+                
                 ${!isFullYear && html`
                     <div class="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200 print:border-black print:bg-white">
                         <p class="text-[10px] font-black uppercase text-slate-500 mb-2">Remarks</p>
@@ -498,10 +634,45 @@ export const StudentDetail = ({ student, data, setData, onBack, isBatch = false,
                             <div>
                                 <h4 class="text-[9px] font-bold text-slate-400 uppercase mb-1">Class Teacher</h4>
                                 <p class="text-xs italic">${remark.teacher || 'No remarks provided.'}</p>
+                                <div class="mt-2 pt-2 border-t border-slate-200 print:border-black">
+                                    <p class="text-[8px] text-slate-400 uppercase font-bold">Signature:</p>
+                                    <div class="h-8 mt-1 flex items-center">
+                                        ${remark.teacherSignature ? html`
+                                            <img src="${remark.teacherSignature}" class="h-6 max-w-32 object-contain" alt="Teacher Signature" />
+                                        ` : html`
+                                            <p class="text-[8px] text-slate-300 italic">_____________________</p>
+                                        `}
+                                    </div>
+                                </div>
                             </div>
                             <div>
                                 <h4 class="text-[9px] font-bold text-slate-400 uppercase mb-1">Principal</h4>
                                 <p class="text-xs italic">${remark.principal || 'No remarks provided.'}</p>
+                                <div class="mt-2 pt-2 border-t border-slate-200 print:border-black">
+                                    <p class="text-[8px] text-slate-400 uppercase font-bold">Signature:</p>
+                                    <div class="h-8 mt-1 flex items-center">
+                                        ${remark.principalSignature ? html`
+                                            <img src="${remark.principalSignature}" class="h-6 max-w-32 object-contain" alt="Principal Signature" />
+                                        ` : html`
+                                            <p class="text-[8px] text-slate-300 italic">_____________________</p>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-slate-200 print:border-black flex justify-end">
+                            <div class="text-right">
+                                <p class="text-[8px] text-slate-400 uppercase font-bold mb-1">School Stamp:</p>
+                                <div class="inline-block">
+                                    ${settings.schoolStamp ? html`
+                                        <img src="${settings.schoolStamp}" class="h-12 w-12 object-contain opacity-80" alt="School Stamp" />
+                                    ` : html`
+                                        <div class="w-12 h-12 border-2 border-slate-300 rounded-full flex items-center justify-center">
+                                            <span class="text-[6px] text-slate-300 uppercase">Stamp</span>
+                                        </div>
+                                    `}
+                                </div>
                             </div>
                         </div>
                     </div>

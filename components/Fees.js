@@ -418,7 +418,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
 
     return html`
         <div class="space-y-6">
-            <!-- Payment Prompt Modal -->
+            
             ${showPromptModal && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
@@ -686,14 +686,14 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                 </div>
 
                 <div class="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-800 text-white p-4 sm:p-8 rounded-2xl sm:rounded-3xl shadow-2xl relative overflow-hidden print:bg-white print:text-black print:shadow-2xl print:border print:border-slate-200 min-h-[600px] receipt-container print-section-receipt">
-                    <!-- Decorative elements -->
+                    
                     <div class="absolute -top-20 -right-20 w-60 h-60 bg-blue-500/10 rounded-full blur-3xl print:hidden"></div>
                     <div class="absolute -bottom-20 -left-20 w-60 h-60 bg-green-500/10 rounded-full blur-3xl print:hidden"></div>
                     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br from-blue-500/5 to-green-500/5 rounded-full blur-3xl print:hidden"></div>
                     
                     ${receipt ? html`
                         <div class="relative space-y-6 print:space-y-4 print:w-full">
-                            <!-- Header with logo -->
+                            
                             <div class="flex flex-col items-center text-center border-b-2 border-white/20 print:border-black pb-6">
                                 <div class="w-20 h-20 mb-3 rounded-full bg-white/10 p-1 print:bg-slate-100">
                                     <img src="${data.settings.schoolLogo}" class="w-full h-full object-contain rounded-full" alt="Logo" />
@@ -705,7 +705,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                                 </div>
                             </div>
                             
-                            <!-- Receipt Info -->
+                            
                             <div class="flex flex-col sm:flex-row justify-between items-start gap-4 bg-white/5 print:bg-slate-50 p-4 rounded-xl print:border print:border-slate-200">
                                 <div class="space-y-1">
                                     <p class="text-[9px] text-blue-300 print:text-slate-500 uppercase font-bold">Receipt Number</p>
@@ -721,7 +721,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                                 </div>
                             </div>
 
-                            <!-- Student Info -->
+                            
                             <div class="bg-white/10 print:bg-slate-50 p-4 rounded-xl border border-white/10 print:border-slate-200">
                                 <div class="flex justify-between items-center">
                                     <div>
@@ -739,7 +739,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                                 </div>
                             </div>
 
-                            <!-- Payment Details -->
+                            
                             <div class="border-t border-white/20 pt-4 print:border-slate-200">
                                 <p class="text-[9px] text-blue-300 print:text-slate-500 uppercase font-bold mb-3">Payment Details</p>
                                 <div class="overflow-x-auto no-scrollbar">
@@ -822,7 +822,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                                 </div>
                             </div>
 
-                            <!-- Bank & Mobile Money Details -->
+                            
                             ${(data.settings.bankName || data.settings.mpesaPaybill || data.settings.airtelPaybill) && html`
                                 <div class="mt-6 p-4 bg-slate-800/50 print:bg-slate-50 rounded-xl border border-slate-700 print:border-slate-200">
                                     <p class="text-[9px] font-black uppercase text-slate-500 print:text-slate-600 mb-2">Payment Options</p>
@@ -894,7 +894,7 @@ export const Fees = ({ data, setData, isAdmin, teacherSession }) => {
                 </div>
             </div>
 
-            <!-- Print-only header for transaction history -->
+            
             <div class="hidden print:block mb-4 print-section-table">
                 <div class="text-center border-b-2 border-black pb-2 mb-2">
                     <h1 class="text-xl font-black uppercase">${data.settings.schoolName}</h1>

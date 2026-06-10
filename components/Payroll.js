@@ -142,14 +142,14 @@ export const Payroll = ({ data, setData }) => {
     return html`
         <div class="space-y-6">
 
-            <!-- ── Header & Filters ──────────────────────────────── -->
+            
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 no-print">
                 <div>
                     <h2 class="text-2xl font-bold">Payroll Management</h2>
                     <p class="text-slate-500 text-sm">Kenyan Statutory Deductions — PAYE · NSSF · SHIF · AHL · NITA</p>
                 </div>
                 <div class="flex flex-wrap gap-2 items-center">
-                    <!-- Year filter -->
+                    
                     <select
                         class="p-2 bg-white border border-slate-200 rounded-xl outline-none text-sm font-bold"
                         value=${filterYear}
@@ -157,7 +157,7 @@ export const Payroll = ({ data, setData }) => {
                     >
                         ${availableYears.map(y => html`<option value=${y}>${y}</option>`)}
                     </select>
-                    <!-- Month filter -->
+                    
                     <input
                         type="month"
                         class="p-2 bg-white border border-slate-200 rounded-xl outline-none text-sm font-bold"
@@ -178,7 +178,7 @@ export const Payroll = ({ data, setData }) => {
                 </div>
             </div>
 
-            <!-- ── Summary Cards ─────────────────────────────────── -->
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
                 ${[
                     { label: 'Total Gross', val: totals.gross,   color: 'blue'  },
@@ -194,10 +194,10 @@ export const Payroll = ({ data, setData }) => {
                 `)}
             </div>
 
-            <!-- ── Payroll Table Wrapper ──────────────────────────── -->
+            
             <div class=${`bg-white rounded-2xl border border-slate-100 shadow-sm overflow-x-auto no-scrollbar ${activePayslip ? 'no-print' : ''}`}>
                 
-                <!-- Print Header (Visible only on batch print) -->
+                
                 <div class="hidden print:flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-6 w-full px-4">
                     <div class="flex items-center gap-4">
                         <img src="${data.settings.schoolLogo}" class="w-16 h-16 object-contain" />
@@ -217,33 +217,33 @@ export const Payroll = ({ data, setData }) => {
                 <table class="w-full text-left text-xs min-w-[1400px]" style="print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                     <thead style="background:#1e293b; color:#fff; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                         <tr>
-                            <!-- Earnings group -->
+                            
                             <th class="px-3 py-3 text-left text-[9px] font-black uppercase" rowspan="2" style="color:#fff; vertical-align:bottom;">#</th>
                             <th class="px-3 py-3 text-left text-[9px] font-black uppercase" rowspan="2" style="color:#fff; vertical-align:bottom;">Employee</th>
                             <th class="px-3 py-3 text-right text-[9px] font-black uppercase" rowspan="2" style="color:#fff; vertical-align:bottom;">Basic</th>
                             <th class="px-3 py-2 text-center text-[9px] font-black uppercase border-l border-white/20" colspan="4" style="color:#93c5fd;">─── Allowances ───</th>
                             <th class="px-3 py-3 text-right text-[9px] font-black uppercase border-l border-white/20" rowspan="2" style="color:#86efac; vertical-align:bottom;">Gross</th>
-                            <!-- Statutory deductions -->
+                            
                             <th class="px-3 py-2 text-center text-[9px] font-black uppercase border-l border-white/20" colspan="4" style="color:#fca5a5;">─── Statutory ───</th>
-                            <!-- Conditional + Voluntary -->
+                            
                             <th class="px-3 py-2 text-center text-[9px] font-black uppercase border-l border-white/20" colspan="7" style="color:#fdba74;">─── Other Deductions ───</th>
-                            <!-- Totals -->
+                            
                             <th class="px-3 py-3 text-right text-[9px] font-black uppercase border-l border-white/20" rowspan="2" style="color:#fca5a5; vertical-align:bottom;">Total Ded.</th>
                             <th class="px-3 py-3 text-right text-[9px] font-black uppercase" rowspan="2" style="color:#86efac; vertical-align:bottom;">Net Pay</th>
                             <th class="px-3 py-3 text-center text-[9px] font-black uppercase no-print" rowspan="2" style="color:#fff; vertical-align:bottom;">Action</th>
                         </tr>
                         <tr style="background:#0f172a; color:#fff;">
-                            <!-- Allowance sub-headers -->
+                            
                             <th class="px-3 py-2 text-right text-[8px] font-bold border-l border-white/10" style="color:#93c5fd;">OT</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#93c5fd;">H.Allow</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#93c5fd;">Bonus</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#93c5fd;">Other</th>
-                            <!-- Statutory sub-headers -->
+                            
                             <th class="px-3 py-2 text-right text-[8px] font-bold border-l border-white/10" style="color:#fca5a5;">PAYE</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#fca5a5;">NSSF</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#fca5a5;">SHIF</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#fca5a5;">AHL</th>
-                            <!-- Other deduction sub-headers -->
+                            
                             <th class="px-3 py-2 text-right text-[8px] font-bold border-l border-white/10" style="color:#fdba74;">HELB</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#fdba74;">Court</th>
                             <th class="px-3 py-2 text-right text-[8px] font-bold" style="color:#fdba74;">SACCO</th>
@@ -263,21 +263,21 @@ export const Payroll = ({ data, setData }) => {
                                     <div class="font-bold text-slate-800 whitespace-nowrap">${staff.name}</div>
                                     <div class="text-[9px] text-slate-400 uppercase">${staff.role || (staff.subjects ? staff.subjects.split(',')[0] : 'Staff')}</div>
                                 </td>
-                                <!-- Basic -->
+                                
                                 ${numCell(entry?.basic, 'font-bold text-slate-700')}
-                                <!-- Allowances -->
+                                
                                 ${numCell(entry?.extraEarnings?.overtime, 'text-blue-600')}
                                 ${numCell(entry?.extraEarnings?.houseAllowance, 'text-blue-600')}
                                 ${numCell(entry?.extraEarnings?.bonus, 'text-blue-600')}
                                 ${numCell(entry?.extraEarnings?.otherAllowance, 'text-blue-600')}
-                                <!-- Gross -->
+                                
                                 ${numCell(entry?.gross, 'font-black text-green-700')}
-                                <!-- Statutory -->
+                                
                                 ${numCell(entry?.paye, 'font-bold text-red-600')}
                                 ${numCell(entry?.nssf, 'text-red-500')}
                                 ${numCell(entry?.shif, 'text-red-500')}
                                 ${numCell(entry?.ahl,  'text-red-500')}
-                                <!-- Other deductions -->
+                                
                                 ${numCell(d.helb,          'text-orange-600')}
                                 ${numCell(d.courtOrder,    'text-orange-600')}
                                 ${numCell(d.sacco,         'text-orange-600')}
@@ -285,10 +285,10 @@ export const Payroll = ({ data, setData }) => {
                                 ${numCell(d.pension,       'text-orange-600')}
                                 ${numCell(d.bankLoan,      'text-orange-600')}
                                 ${numCell(d.insurance,     'text-orange-600')}
-                                <!-- Total deductions & Net Pay -->
+                                
                                 ${numCell(entry?.totalDeductions, 'font-bold text-red-700')}
                                 ${numCell(entry?.netPay, 'font-black text-green-700')}
-                                <!-- Actions -->
+                                
                                 <td class="px-3 py-3 text-center no-print">
                                     <div class="flex justify-center gap-1">
                                         <button
@@ -305,30 +305,30 @@ export const Payroll = ({ data, setData }) => {
                             </tr>`;
                         })}
                     </tbody>
-                    <!-- TOTALS ROW -->
+                    
                     <tfoot style="background:#f1f5f9; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                         <tr class="border-t-2 border-slate-300">
                             <td class="px-3 py-3 text-right font-black text-[9px] uppercase text-slate-600" colspan="2">
                                 Column Totals (${months[new Date(selectedMonth).getMonth()]} ${selectedMonth.slice(0,4)})
                             </td>
                             <td class="px-3 py-3 text-right font-black text-slate-700">${Math.round(tableRows.reduce((s,r)=>s+(r.entry?.basic||0),0)).toLocaleString()}</td>
-                            <!-- Allowance totals -->
+                            
                             <td class="px-3 py-3 text-right font-bold text-blue-700">${Math.round(tableRows.reduce((s,r)=>s+(Number(r.entry?.extraEarnings?.overtime)||0),0)).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-blue-700">${Math.round(tableRows.reduce((s,r)=>s+(Number(r.entry?.extraEarnings?.houseAllowance)||0),0)).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-blue-700">${Math.round(tableRows.reduce((s,r)=>s+(Number(r.entry?.extraEarnings?.bonus)||0),0)).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-blue-700">${Math.round(tableRows.reduce((s,r)=>s+(Number(r.entry?.extraEarnings?.otherAllowance)||0),0)).toLocaleString()}</td>
-                            <!-- Gross total -->
+                            
                             <td class="px-3 py-3 text-right font-black text-green-800">${Math.round(totals.gross).toLocaleString()}</td>
-                            <!-- Statutory totals -->
+                            
                             <td class="px-3 py-3 text-right font-black text-red-700">${Math.round(totals.paye).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-red-600">${Math.round(totals.nssf).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-red-600">${Math.round(totals.shif).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-bold text-red-600">${Math.round(totals.ahl).toLocaleString()}</td>
-                            <!-- Other deduction totals -->
+                            
                             ${['helb','courtOrder','sacco','unionDues','pension','bankLoan','insurance'].map(k => html`
                                 <td class="px-3 py-3 text-right font-bold text-orange-700">${Math.round(tableRows.reduce((s,r)=>s+(Number(r.entry?.extraDeductions?.[k])||0),0)).toLocaleString()}</td>
                             `)}
-                            <!-- Grand totals -->
+                            
                             <td class="px-3 py-3 text-right font-black text-red-800">${Math.round(totals.totalDed).toLocaleString()}</td>
                             <td class="px-3 py-3 text-right font-black text-green-800">${Math.round(totals.netPay).toLocaleString()}</td>
                             <td class="no-print"></td>
@@ -336,7 +336,7 @@ export const Payroll = ({ data, setData }) => {
                     </tfoot>
                 </table>
 
-                <!-- Print Footer (Visible only on batch print) -->
+                
                 <div class="hidden print:grid grid-cols-3 gap-8 pt-12 px-6 pb-6 w-full">
                     <div class="text-center">
                         <div class="border-t-2 border-slate-300 pt-2">
@@ -362,7 +362,7 @@ export const Payroll = ({ data, setData }) => {
                 </div>
             </div>
 
-            <!-- ── Edit Modal ─────────────────────────────────────── -->
+            
             ${editingStaff && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-start justify-center p-4 no-print overflow-y-auto pt-10">
                     <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl animate-in zoom-in-95 mb-10">
@@ -458,13 +458,13 @@ export const Payroll = ({ data, setData }) => {
                 </div>
             `}
 
-            <!-- ── Payslip Modal ───────────────────────────────────── -->
+            
             ${activePayslip && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-start justify-center p-4 no-print overflow-y-auto pt-4 md:pt-10">
                     <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl animate-in zoom-in-95 mb-10 print:shadow-none print:m-0 print:w-full print:max-w-none">
                         <div class="p-8 space-y-6 print:p-6" id="printable-payslip">
 
-                            <!-- Payslip Header -->
+                            
                             <div class="flex justify-between items-start border-b-2 border-slate-800 pb-5"
                                  style="print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                                 <div class="flex items-center gap-4">
@@ -484,7 +484,7 @@ export const Payroll = ({ data, setData }) => {
                                 </div>
                             </div>
 
-                            <!-- Employee Info -->
+                            
                             <div class="grid grid-cols-2 gap-4 text-sm bg-slate-50 rounded-xl p-4"
                                  style="print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                                 <div class="space-y-1">
@@ -508,10 +508,10 @@ export const Payroll = ({ data, setData }) => {
                                 </div>
                             </div>
 
-                            <!-- Earnings & Deductions side-by-side -->
+                            
                             <div class="border rounded-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x border-slate-200">
 
-                                <!-- EARNINGS -->
+                                
                                 <div class="flex flex-col">
                                     <div class="bg-blue-700 font-bold text-[10px] uppercase p-3 border-b flex justify-between"
                                          style="background:#1d4ed8; color:#fff; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
@@ -537,7 +537,7 @@ export const Payroll = ({ data, setData }) => {
                                     </div>
                                 </div>
 
-                                <!-- DEDUCTIONS -->
+                                
                                 <div class="flex flex-col">
                                     <div class="bg-red-700 font-bold text-[10px] uppercase p-3 border-b flex justify-between"
                                          style="background:#b91c1c; color:#fff; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
@@ -545,7 +545,7 @@ export const Payroll = ({ data, setData }) => {
                                         <span style="color:#fecaca;">(${data.settings.currency})</span>
                                     </div>
                                     <div class="p-3 space-y-1 text-xs flex-1">
-                                        <!-- Section: Statutory -->
+                                        
                                         <p class="text-[8px] font-black uppercase text-slate-400 pt-1">Statutory</p>
                                         ${[
                                             { key:'paye', val: activePayslip.entry.paye },
@@ -559,7 +559,7 @@ export const Payroll = ({ data, setData }) => {
                                             </div>
                                         `)}
 
-                                        <!-- Section: Conditional + Voluntary -->
+                                        
                                         ${(() => {
                                             const ded = activePayslip.entry.extraDeductions || {};
                                             const hasAny = EXTRA_DED_KEYS.some(k => Number(ded[k]) > 0);
@@ -576,7 +576,7 @@ export const Payroll = ({ data, setData }) => {
                                                 </div>
                                             `;
                                         })}
-                                        <!-- NITA note -->
+                                        
                                         <p class="text-[8px] text-slate-400 italic pt-1">* NITA Levy (KES 50) — Employer borne, not deducted.</p>
                                     </div>
                                     <div class="p-3 bg-red-50 border-t flex justify-between font-black text-red-900 text-xs uppercase"
@@ -586,7 +586,7 @@ export const Payroll = ({ data, setData }) => {
                                     </div>
                                 </div>
 
-                                <!-- NET PAY BANNER -->
+                                
                                 <div class="col-span-full p-4 flex flex-col border-t-2 border-slate-800"
                                      style="background:#7FFFD4; print-color-adjust:exact; -webkit-print-color-adjust:exact;">
                                     <div class="flex justify-between items-center">
@@ -600,7 +600,7 @@ export const Payroll = ({ data, setData }) => {
                                 </div>
                             </div>
 
-                            <!-- Signatures -->
+                            
                             <div class="flex justify-between items-end pt-6">
                                 <div class="text-center w-44 border-t-2 border-slate-400 pt-2">
                                     <p class="text-[8px] font-bold uppercase text-slate-500">Employee Signature</p>
@@ -615,7 +615,7 @@ export const Payroll = ({ data, setData }) => {
                             </div>
                         </div>
 
-                        <!-- Modal action bar -->
+                        
                         <div class="bg-slate-900 rounded-b-3xl p-4 flex gap-3 no-print">
                             <button onClick=${() => setActivePayslip(null)} class="flex-1 py-3 text-white font-bold hover:bg-slate-700 rounded-xl transition-colors">Close</button>
                             <${PrintButtons} className="flex-1" />
@@ -624,7 +624,7 @@ export const Payroll = ({ data, setData }) => {
                 </div>
             `}
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black no-print">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>

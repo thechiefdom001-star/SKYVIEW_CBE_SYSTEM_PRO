@@ -93,7 +93,7 @@ export const SchoolCalendar = ({ data, isAdmin }) => {
             </header>
 
             <div class="bg-white dark:bg-slate-900 rounded-[32px] p-6 shadow-2xl border border-slate-100 dark:border-slate-800">
-                <!-- Calendar Controls -->
+                
                 <div class="flex items-center justify-between mb-8">
                     <h2 class="text-2xl font-black text-slate-900 dark:text-white">${monthName} <span class="text-slate-400 font-medium">${year}</span></h2>
                     <div class="flex gap-2">
@@ -103,7 +103,7 @@ export const SchoolCalendar = ({ data, isAdmin }) => {
                     </div>
                 </div>
 
-                <!-- Calendar Grid -->
+                
                 <div class="grid grid-cols-7 gap-px bg-slate-100 dark:bg-slate-800 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800">
                     ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => html`
                         <div class="bg-slate-50 dark:bg-slate-900/50 py-3 text-center text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-inherit">${day}</div>
@@ -155,7 +155,7 @@ export const SchoolCalendar = ({ data, isAdmin }) => {
                 </div>
             </div>
 
-            <!-- Upcoming Events Table -->
+            
             <section class="mt-12 mb-12">
                 <h3 class="text-2xl font-black text-indigo-600 mb-6 flex items-center gap-3">
                     <span class="bg-indigo-600 w-3 h-3 rounded-full"></span> 
@@ -209,7 +209,7 @@ export const SchoolCalendar = ({ data, isAdmin }) => {
                 </div>
             </section>
 
-            <!-- Add Event Modal -->
+            
             ${showAddModal && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-md z-[100] flex items-center justify-center p-4">
                     <div class="bg-white dark:bg-slate-900 w-full max-w-md rounded-3xl overflow-hidden shadow-2xl border border-white/10 animate-scale-up">

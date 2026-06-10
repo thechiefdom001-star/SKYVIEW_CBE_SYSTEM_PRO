@@ -212,12 +212,14 @@ export const Settings = ({ data, setData }) => {
     ];
 
     const getGradeGroup = (grade) => {
+        const baby = ['BABY CLASS'];
         const pp1pp2 = ['PP1', 'PP2'];
         const grade1to3 = ['GRADE 1', 'GRADE 2', 'GRADE 3'];
         const grade4to6 = ['GRADE 4', 'GRADE 5', 'GRADE 6'];
         const grade7to9 = ['GRADE 7', 'GRADE 8', 'GRADE 9'];
         const grade10to12 = ['GRADE 10', 'GRADE 11', 'GRADE 12'];
         
+        if (baby.includes(grade)) return 'baby';
         if (pp1pp2.includes(grade)) return 'pp1-pp2';
         if (grade1to3.includes(grade)) return 'grade1-3';
         if (grade4to6.includes(grade)) return 'grade4-6';
@@ -573,9 +575,10 @@ export const Settings = ({ data, setData }) => {
                         </div>
                     </div>
                     
-                    <!-- Grade Group Cards -->
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         ${[
+                            { id: 'baby', label: 'Baby Class', grades: ['BABY CLASS'], color: 'bg-yellow-50 border-yellow-200' },
                             { id: 'pp1-pp2', label: 'PP1 - PP2', grades: ['PP1', 'PP2'], color: 'bg-pink-50 border-pink-200' },
                             { id: 'grade1-3', label: 'Grade 1 - 3', grades: ['GRADE 1', 'GRADE 2', 'GRADE 3'], color: 'bg-blue-50 border-blue-200' },
                             { id: 'grade4-6', label: 'Grade 4 - 6', grades: ['GRADE 4', 'GRADE 5', 'GRADE 6'], color: 'bg-green-50 border-green-200' },
@@ -670,7 +673,7 @@ export const Settings = ({ data, setData }) => {
                                                 </div>
                                             `)}
                                             
-                                            <!-- Fee Items Toggle Section -->
+                                            
                                             <div class="border-t border-slate-100 pt-3 mt-3">
                                                 <p class="text-xs font-bold text-slate-500 mb-2">Fee Items - Compulsory/Optional</p>
                                                 <div class="space-y-1.5">
@@ -732,7 +735,7 @@ export const Settings = ({ data, setData }) => {
                                                 </div>
                                             </div>
                                             
-                                            <!-- Add/Edit Grade Button -->
+                                            
                                             <button 
                                                 onClick=${() => {
                                                     const gradeName = prompt('Enter grade name (e.g., GRADE 1):');
@@ -784,12 +787,13 @@ export const Settings = ({ data, setData }) => {
                     `}
                 </div>
 
-                <!-- Edit Fee Modal -->
+                
                 ${editingFeeGrade && (() => {
                     const feeStructure = settings.feeStructures.find(f => f.grade === editingFeeGrade);
                     if (!feeStructure) return null;
                     
                     const gradeGroup = [
+                        { id: 'baby', grades: ['BABY CLASS'] },
                         { id: 'pp1-pp2', grades: ['PP1', 'PP2'] },
                         { id: 'grade1-3', grades: ['GRADE 1', 'GRADE 2', 'GRADE 3'] },
                         { id: 'grade4-6', grades: ['GRADE 4', 'GRADE 5', 'GRADE 6'] },
@@ -870,7 +874,7 @@ export const Settings = ({ data, setData }) => {
                     `;
                 })()}
 
-                <!-- Add New Fee Modal -->
+                
                 ${showAddNewFeeModal && html`
                     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                         <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">
@@ -978,7 +982,7 @@ export const Settings = ({ data, setData }) => {
                     </div>
                 `}
 
-                <!-- Selective Import Modal -->
+                
                 ${showImportModal && html`
                     <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                         <div class="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
@@ -1202,7 +1206,7 @@ export const Settings = ({ data, setData }) => {
                     </div>
                 </div>
 
-                <!-- Bank & Mobile Money Details -->
+                
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div class="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
                         <h3 class="text-white font-black text-lg">💳 Bank & Mobile Money Details</h3>
@@ -1278,7 +1282,7 @@ export const Settings = ({ data, setData }) => {
                     </div>
                 </div>
 
-                <!-- M-Pesa API Configuration -->
+                
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div class="bg-gradient-to-r from-green-600 to-green-800 px-6 py-4">
                         <h3 class="text-white font-black text-lg">🔐 M-Pesa API Configuration</h3>
@@ -1344,7 +1348,7 @@ export const Settings = ({ data, setData }) => {
                     </div>
                 </div>
 
-                <!-- Airtel Money API Configuration -->
+                
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div class="bg-gradient-to-r from-red-600 to-red-800 px-6 py-4">
                         <h3 class="text-white font-black text-lg">🔐 Airtel Money API Configuration</h3>
@@ -1401,7 +1405,7 @@ export const Settings = ({ data, setData }) => {
                     </div>
                 </div>
 
-                <!-- Google Sheet Sync Configuration -->
+                
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
                     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
                         <h3 class="text-white font-black text-lg">📊 Teacher Data Sync</h3>

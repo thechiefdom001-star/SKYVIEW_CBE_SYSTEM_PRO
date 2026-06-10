@@ -26,6 +26,9 @@ import { ParentsDashboard } from './components/ParentsDashboard.js';
 import { SchoolCalendar } from './components/SchoolCalendar.js';
 import { StudentDetail } from './components/StudentDetail.js';
 import { PrintButtons } from './components/PrintButtons.js';
+import { SchoolAnalysis } from './components/SchoolAnalysis.js';
+import { StrategicReports } from './components/StrategicReports.js';
+import { Presentation } from './components/Presentation.js';
 import { Storage } from './lib/storage.js';
 import { googleSheetSync } from './lib/googleSheetSync.js';
 
@@ -48,6 +51,21 @@ const App = () => {
         
         // Expose sync to window for components
         window.googleSync = googleSheetSync;
+
+        // Auto-sync teachers on refresh if Google Sheet is configured
+        if (currentData.settings?.googleScriptUrl) {
+            console.log('🔄 Session Sync: Auto-refreshing teacher records from Google Sheet...');
+            googleSheetSync.setSettings(currentData.settings);
+            googleSheetSync.fetchAll().then(result => {
+                if (result.success && result.teachers) {
+                    console.log('✅ Teacher records synced successfully from Google Sheet:', result.teachers.length);
+                    // Use Storage helper to merge Google teachers into current local state
+                    const updatedData = Storage.replaceWithGoogleData(currentData, { teachers: result.teachers });
+                    Storage.save(updatedData);
+                    setData(updatedData);
+                }
+            }).catch(err => console.error('❌ Teacher session sync failed:', err));
+        }
     }, []);
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -963,7 +981,7 @@ const App = () => {
         e.preventDefault();
         const normalizedUsername = loginUsername.trim().toLowerCase();
 
-        if (normalizedUsername === 'skyview' && loginPassword === 'skyviewschool') {
+        if (normalizedUsername === 'admin' && loginPassword === 'admin002') {
             setIsAdmin(true);
             localStorage.setItem('et_is_admin', 'true');
             localStorage.setItem('et_login_username', normalizedUsername);
@@ -1107,6 +1125,7 @@ const App = () => {
     const renderView = () => {
         switch (view) {
             case 'dashboard': return html`<${Dashboard} data=${data} setData=${setData} googleSyncStatus=${googleSyncStatus} isAdmin=${isAdmin} teacherSession=${teacherSession} />`;
+            case 'strategic-reports': return html`<${StrategicReports} data=${data} setData=${setData} isAdmin=${isAdmin} />`;
             case 'batch-reports': {
                 const [batchTerm, setBatchTerm] = useState('T1');
                 const [batchGrade, setBatchGrade] = useState(selectedStudent?.grade || 'GRADE 1');
@@ -1215,13 +1234,15 @@ const App = () => {
             case 'student-detail': return html`<${StudentDetail} student=${selectedStudent} data=${data} setData=${setData} onBack=${() => setView('students')} isAdmin=${isAdmin} teacherSession=${teacherSession} />`;
             case 'parents-dashboard': return html`<${ParentsDashboard} data=${data} parentSession=${parentSession} setData=${setData} />`;
             case 'school-calendar': return html`<${SchoolCalendar} data=${data} isAdmin=${isAdmin} />`;
+            case 'school-analysis': return html`<${SchoolAnalysis} data=${data} setData=${setData} isAdmin=${isAdmin} />`;
+            case 'strategic-presentation': return html`<${Presentation} data=${data} />`;
             default: return html`<${Dashboard} data=${data} setData=${setData} googleSyncStatus=${googleSyncStatus} isAdmin=${isAdmin} teacherSession=${teacherSession} parentSession=${parentSession} />`;
         }
     };
 
     return html`
         <div class=${`flex flex-col h-screen w-full overflow-hidden ${data.settings.theme === 'dark' ? 'dark text-white' : ''}`}>
-            <!-- Dynamic Styles Injection -->
+            
             <style>
                 :root {
                     --primary: ${data.settings.primaryColor || '#2563eb'};
@@ -1317,7 +1338,7 @@ const App = () => {
                 }
             </style>
 
-            <!-- Navbar -->
+            
             <header class="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-8 z-40 no-print">
                 <div class="flex items-center gap-3">
                     <button 
@@ -1468,7 +1489,7 @@ const App = () => {
                 </main>
             </div>
 
-            <!-- Login Modal -->
+            
             ${showLoginModal && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div class="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl animate-in zoom-in-95 duration-200">
@@ -1507,7 +1528,7 @@ const App = () => {
                 </div>
             `}
 
-            <!-- Teacher Authentication Modal -->
+            
             ${showTeacherAuth && html`
                 <${TeacherAuth} 
                     settings=${data.settings}
@@ -1518,7 +1539,7 @@ const App = () => {
                 />
             `}
 
-            <!-- Parent Authentication Modal -->
+            
             ${showParentAuth && html`
                 <${ParentAuth} 
                     onLogin=${handleParentLogin}
@@ -1526,7 +1547,7 @@ const App = () => {
                 />
             `}
 
-            <!-- Force Push Modal -->
+            
             ${showForcePushModal && html`
                 <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
                     <div class="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-200">

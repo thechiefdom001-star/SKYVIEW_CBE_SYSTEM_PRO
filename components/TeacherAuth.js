@@ -333,7 +333,7 @@ export const TeacherAuth = ({ settings, data = {}, setData = () => {}, onLogin, 
     return html`
         <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-y-auto max-h-[90vh]">
-                <!-- Header -->
+                
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white text-center">
                     <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                         <span class="text-3xl">👩‍🏫</span>
@@ -344,7 +344,7 @@ export const TeacherAuth = ({ settings, data = {}, setData = () => {}, onLogin, 
                     </p>
                 </div>
 
-                <!-- Form -->
+                
                 <div class="p-6">
                     ${error && html`
                         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">

@@ -6,6 +6,8 @@ import { googleSheetSync } from '../lib/googleSheetSync.js';
 import { Pagination } from '../lib/pagination.js';
 import { PaginationControls } from './Pagination.js';
 import { PrintButtons } from './PrintButtons.js';
+import { PhotoGallery } from './PhotoGallery.js';
+import { resizeImage, fileToDataUrl } from '../lib/imageUtils.js';
 
 const html = htm.bind(h);
 
@@ -15,8 +17,9 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
     const paymentsData = data?.payments || [];
     const assessmentsData = data?.assessments || [];
     const settingsData = data?.settings || {};
-    
+
     const [showAdd, setShowAdd] = useState(false);
+    const [showPhotoGallery, setShowPhotoGallery] = useState(false);
     const [syncStatus, setSyncStatus] = useState('');
     const [filterGrade, setFilterGrade] = useState('ALL');
     const [filterStream, setFilterStream] = useState('ALL');
@@ -148,7 +151,8 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
         upiNo: '',
         parentContact: '',
         previousArrears: 0,
-        selectedFees: getDefaultFees()
+        selectedFees: getDefaultFees(),
+        portrait: ''
     });
 
     const handleAdd = async (e) => {
@@ -158,31 +162,60 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
             const filteredStudent = { ...newStudent, id: editingId, selectedFees: filterHiddenFees(newStudent.selectedFees) };
             const oldStudent = data.students.find(s => s.id === editingId);
             const updated = data.students.map(s => s.id === editingId ? filteredStudent : s);
-            
+
             setData({ ...data, students: updated });
             setEditingId(null);
+
+            // Save photo to gallery if portrait exists
+            savePhotoToGallery(filteredStudent);
 
             if (data.settings.googleScriptUrl) {
                 setSyncStatus('Updating Google Sheet...');
                 googleSheetSync.setSettings(data.settings);
-                await googleSheetSync.updateStudent(filteredStudent);
-                trackActivity('EDIT', filteredStudent);
-                setSyncStatus('✓ Updated in Sheet!');
-                setTimeout(() => setSyncStatus(''), 2500);
+                // Ensure we pass the student list for enrichment if needed
+                googleSheetSync.setStudents(data.students);
+                const syncResult = await googleSheetSync.pushStudent(filteredStudent);
+                if (syncResult.success) {
+                    trackActivity('EDIT', filteredStudent);
+                    setSyncStatus('✓ Updated in Sheet!');
+                } else {
+                    console.error('Sync failed:', syncResult.error);
+                    setSyncStatus('⚠ Sync failed: ' + (syncResult.error || 'Unknown error'));
+                }
+                setTimeout(() => setSyncStatus(''), 3000);
             }
         } else {
             const id = Date.now().toString();
             const newStudentWithId = { ...newStudent, id, selectedFees: filterHiddenFees(newStudent.selectedFees) };
-            
+
+            console.log('[Students] Adding new student:', newStudentWithId.name, 'ID:', id);
+            console.log('[Students] Google Script URL configured:', !!data.settings.googleScriptUrl);
+
             setData({ ...data, students: [...(data.students || []), newStudentWithId] });
+
+            // Save photo to gallery if portrait exists
+            savePhotoToGallery(newStudentWithId);
 
             if (data.settings.googleScriptUrl) {
                 setSyncStatus('Syncing to Google...');
                 googleSheetSync.setSettings(data.settings);
-                await googleSheetSync.pushStudent(newStudentWithId);
-                trackActivity('ADD', newStudentWithId);
-                setSyncStatus('✓ Synced!');
-                setTimeout(() => setSyncStatus(''), 2000);
+                googleSheetSync.setStudents([...(data.students || []), newStudentWithId]);
+                console.log('[Students] Attempting to sync student to sheet...');
+                const syncResult = await googleSheetSync.pushStudent(newStudentWithId);
+                console.log('[Students] Sync result:', syncResult);
+                if (syncResult.success) {
+                    trackActivity('ADD', newStudentWithId);
+                    setSyncStatus('✓ Synced!');
+                } else {
+                    console.error('Sync failed:', syncResult.error);
+                    setSyncStatus('⚠ Sync failed: ' + (syncResult.error || 'Unknown error'));
+                    alert('Sync to Google Sheet failed: ' + (syncResult.error || 'Unknown error'));
+                }
+                setTimeout(() => setSyncStatus(''), 5000);
+            } else {
+                console.warn('[Students] Google Script URL not configured - student saved locally only');
+                setSyncStatus('⚠ Saved locally (no Google Sheet configured)');
+                setTimeout(() => setSyncStatus(''), 3000);
             }
         }
         setShowAdd(false);
@@ -201,7 +234,8 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
             stream: streams[0] || '',
             previousArrears: 0,
             selectedFees: getDefaultFees(),
-            religion: ''
+            religion: '',
+            portrait: ''
         });
         setEditingId(null);
     };
@@ -359,17 +393,77 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
         setNewStudent({ ...newStudent, selectedFees: updated });
     };
 
-    // RESTORED: Original working filter logic
+    const handlePortraitUpload = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                // Convert file to data URL
+                const dataUrl = await fileToDataUrl(file);
+                console.log('[Students] Original image size:', Math.round(dataUrl.length / 1024), 'KB');
+
+                // Auto-resize to recommended size
+                const resizedDataUrl = await resizeImage(dataUrl, {
+                    width: 300,
+                    height: 400,
+                    maxWidth: 500,
+                    maxHeight: 600,
+                    quality: 0.8
+                });
+                console.log('[Students] Resized image size:', Math.round(resizedDataUrl.length / 1024), 'KB');
+
+                setNewStudent({ ...newStudent, portrait: resizedDataUrl });
+            } catch (error) {
+                console.error('[Students] Portrait upload error:', error);
+                alert('Failed to process portrait image. Please try a different image.');
+            }
+        }
+    };
+
+    // Helper function to save photo to gallery
+    const savePhotoToGallery = (student) => {
+        if (!student.portrait) return;
+
+        try {
+            const storedGallery = localStorage.getItem('et_photo_gallery');
+            let photos = storedGallery ? JSON.parse(storedGallery) : [];
+
+            // Check if photo already exists for this student
+            const existingIndex = photos.findIndex(p => p.studentId === student.id);
+
+            const photoEntry = {
+                studentId: student.id,
+                name: student.name,
+                grade: student.grade,
+                stream: student.stream,
+                admissionNo: student.admissionNo,
+                portrait: student.portrait,
+                updatedAt: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                photos[existingIndex] = photoEntry;
+            } else {
+                photos.push(photoEntry);
+            }
+
+            localStorage.setItem('et_photo_gallery', JSON.stringify(photos));
+            console.log('[Students] Photo saved to gallery:', student.name);
+        } catch (error) {
+            console.error('[Students] Gallery save error:', error);
+        }
+    };
+
+    // RESTORED: Original working filter logic with null safety
     const filteredStudents = bypassFilters 
         ? studentsData 
         : studentsData.filter(s => {
-            const searchLower = searchTerm.toLowerCase();
+            const searchLower = searchTerm ? searchTerm.toLowerCase() : '';
             const matchesSearch = !searchTerm ||
                 (s.name && s.name.toLowerCase().includes(searchLower)) ||
                 (s.admissionNo && s.admissionNo.toLowerCase().includes(searchLower)) ||
                 (s.grade && s.grade.toLowerCase().includes(searchLower)) ||
                 (s.stream && s.stream.toLowerCase().includes(searchLower)) ||
-                (s.parentContact && s.parentContact.toString().includes(searchTerm));
+                (s.parentContact && String(s.parentContact).includes(searchTerm));
 
             if (!matchesSearch) {
                 if (searchTerm && studentsData.indexOf(s) < 3) console.log(`[Filter Debug] ${s.name} rejected by search: "${searchTerm}"`);
@@ -430,7 +524,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
 
     return html`
         <div class="space-y-6">
-            <!-- DEBUG PANEL - Always visible -->
+            
             <div style="background: #e0f2fe; border: 2px solid #0284c7; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 11px;">
                 <strong>📊 Data Status:</strong> Total: ${studentsData.length} students<br/>
                 <strong>Page:</strong> ${currentPage} | Showing: ${startIndex + 1}-${Math.min(startIndex + STUDENTS_PER_PAGE, safeFilteredStudents.length)} of ${safeFilteredStudents.length}<br/>
@@ -439,7 +533,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                 <button onClick=${() => setCurrentPage(1)} style="padding: 4px 8px; background: #16a34a; color: white; border: none; border-radius: 4px; cursor: pointer;">First Page</button>
             </div>
             
-            <!-- DEBUG PANEL - Visible data status -->
+            
             ${(data.students || []).length === 0 && html`
                 <div style="background: #fef3c7; border: 2px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <strong>⚠️ CRITICAL: No students in data!</strong><br/>
@@ -583,8 +677,15 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                         ${bypassFilters ? '✓ Filters Bypassed' : 'Bypass Filters'}
                     </button>
                     <${PrintButtons} />
+                    <button
+                        onClick=${() => setShowPhotoGallery(true)}
+                        class="bg-pink-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm hover:bg-pink-700 no-print"
+                        title="View and manage student photo gallery"
+                    >
+                        📸 Photo Gallery
+                    </button>
                     ${data.settings.googleScriptUrl && html`
-                        <button 
+                        <button
                             onClick=${handleSyncDeletions}
                             class="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm hover:bg-purple-700 no-print"
                             title="Check for students deleted in Google Sheet"
@@ -592,7 +693,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                             ↻ Sync from Sheet
                         </button>
                     `}
-                    <button 
+                    <button
                         onClick=${() => { if (showAdd) resetForm(); setShowAdd(!showAdd); }}
                         class="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm hover:bg-blue-700"
                     >
@@ -611,7 +712,28 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
             ${showAdd && html`
                 <form onSubmit=${handleAdd} class="bg-white p-6 rounded-2xl border border-blue-100 shadow-sm space-y-4 animate-in slide-in-from-top-4 duration-300 no-print">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="space-y-1">
+                        <div class="space-y-1 md:col-span-1">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Student Portrait</label>
+                            <div class="flex items-center gap-3">
+                                ${newStudent.portrait ? html`
+                                    <img src=${newStudent.portrait} class="w-16 h-16 rounded-lg object-cover border-2 border-blue-200" alt="Portrait" />
+                                ` : html`
+                                    <div class="w-16 h-16 rounded-lg bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                                        <span class="text-2xl">👤</span>
+                                    </div>
+                                `}
+                                <div class="flex-1">
+                                    <input 
+                                        type="file"
+                                        accept="image/*"
+                                        onChange=${handlePortraitUpload}
+                                        class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-bold hover:file:bg-blue-100"
+                                    />
+                                    <p class="text-[9px] text-slate-400 mt-1">Upload student photo (optional)</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1 md:col-span-2">
                             <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Full Name</label>
                             <input 
                                 placeholder="e.g. John Doe" 
@@ -722,6 +844,15 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                                 onInput=${(e) => setNewStudent({ ...newStudent, previousArrears: Number(e.target.value) })}
                             />
                         </div>
+                        <div class="space-y-1 md:col-span-2">
+                            <label class="text-[10px] font-bold text-indigo-600 uppercase ml-1">Portrait URL</label>
+                            <input 
+                                placeholder="https://example.com/student-portrait.jpg" 
+                                class="w-full p-3 bg-indigo-50 rounded-lg border-0 focus:ring-2 focus:ring-indigo-500 outline-none font-medium"
+                                value=${newStudent.portrait}
+                                onInput=${(e) => setNewStudent({ ...newStudent, portrait: e.target.value })}
+                            />
+                        </div>
                     </div>
                     <div class="space-y-2 pt-2 border-t border-slate-100">
                         <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Applicable Fee Items (Fee Profile)</label>
@@ -748,7 +879,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                 </form>
             `}
 
-            <!-- Print Header -->
+            
             <div class="hidden print:flex flex-col items-center text-center border-b pb-2 mb-2">
                 <img src="${data.settings.schoolLogo}" class="w-12 h-12 mb-1 object-contain" alt="Logo" />
                 <h1 class="text-xl font-black uppercase text-slate-900">${data.settings.schoolName}</h1>
@@ -763,6 +894,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                     <thead class="bg-slate-50 border-b border-slate-100">
                         <tr>
                             <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">#</th>
+                            <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Portrait</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Name</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Adm No</th>
                             <th class="px-6 py-4 text-[10px] font-bold text-slate-500 uppercase">Adm Date</th>
@@ -782,6 +914,15 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                         ).map((student, idx) => html`
                             <tr key=${student.id} class="hover:bg-slate-100 transition-colors even:bg-slate-50 students-screen-row ${student.status === 'left' ? 'opacity-60 bg-red-50' : ''}">
                                 <td class="px-6 py-4 text-slate-400 text-xs font-mono">${(currentPage - 1) * STUDENTS_PER_PAGE + idx + 1}</td>
+                                <td class="px-6 py-4">
+                                    ${student.portrait ? html`
+                                        <img src=${student.portrait} class="w-10 h-10 rounded-lg object-cover border border-slate-200" alt="Portrait" />
+                                    ` : html`
+                                        <div class="w-10 h-10 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                                            <span class="text-lg">👤</span>
+                                        </div>
+                                    `}
+                                </td>
                                 <td class="px-6 py-4">
                                     <div class="font-bold text-sm ${student.status === 'left' ? 'text-red-600 line-through' : ''}">${student.name}</div>
                                     <div class="text-[9px] text-slate-400 uppercase">${student.stream || 'No Stream'}</div>
@@ -858,11 +999,20 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                             </tr>
                         `)}
                     </tbody>
-                    <!-- Full data tbody: hidden on screen, visible during print -->
+                    
                     <tbody class="students-print-rows" style="display:none">
                         ${filteredStudents.map((student, idx) => html`
                             <tr key=${`print-${student.id}`} class="even:bg-slate-50">
                                 <td class="px-4 py-2 text-slate-400 text-xs font-mono">${idx + 1}</td>
+                                <td class="px-4 py-2">
+                                    ${student.portrait ? html`
+                                        <img src=${student.portrait} class="w-8 h-8 rounded-lg object-cover border border-slate-200" alt="Portrait" />
+                                    ` : html`
+                                        <div class="w-8 h-8 rounded-lg bg-slate-100 border border-dashed border-slate-300 flex items-center justify-center text-slate-400">
+                                            <span class="text-sm">👤</span>
+                                        </div>
+                                    `}
+                                </td>
                                 <td class="px-4 py-2">
                                     <div class="font-bold text-sm">${student.name}</div>
                                     <div class="text-[9px] text-slate-400 uppercase">${student.stream || 'No Stream'}</div>
@@ -913,7 +1063,7 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                 `}
             </div>
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>
@@ -922,5 +1072,13 @@ export const Students = ({ data, setData, onSelectStudent, isAdmin, teacherSessi
                 </div>
             </div>
         </div>
+
+        ${showPhotoGallery && html`
+            <${PhotoGallery}
+                data=${data}
+                setData=${setData}
+                onClose=${() => setShowPhotoGallery(false)}
+            />
+        `}
     `;
 };

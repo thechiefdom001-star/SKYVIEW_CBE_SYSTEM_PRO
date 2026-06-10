@@ -179,14 +179,16 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
         return true;
     });
 
-    const updateAssessment = (studentId, field, value) => {
+    const updateAssessment = (studentId, field, value, customSubject = null) => {
         const studentIdStr = String(studentId);
         const academicYear = data.settings?.academicYear || '2025/2026';
+        
+        const targetSubject = customSubject || selectedSubject;
         
         // Use LOOSE MATCHING to find existing record
         const termToMatch = String(selectedTerm || '').toLowerCase().trim();
         const examToMatch = String(selectedExamType || '').toLowerCase().trim();
-        const subjToMatch = String(selectedSubject || '').toLowerCase().trim();
+        const subjToMatch = String(targetSubject || '').toLowerCase().trim();
 
         const existing = data.assessments.find(a => {
             const studentMatch = String(a.studentId) === studentIdStr || String(a.studentId) === String(studentId);
@@ -206,7 +208,7 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
         
         // Remove existing and keep other assessments
         const otherAssessments = data.assessments.filter(a => 
-            !((String(a.studentId) === studentIdStr || String(a.studentId) === String(studentId)) && a.subject === selectedSubject && a.term === selectedTerm && a.examType === selectedExamType && a.academicYear === academicYear)
+            !((String(a.studentId) === studentIdStr || String(a.studentId) === String(studentId)) && a.subject === targetSubject && a.term === selectedTerm && a.examType === selectedExamType && a.academicYear === academicYear)
         );
         
         // Get student's actual grade from data
@@ -246,7 +248,7 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
             studentAdmissionNo: student?.admissionNo || '',
             studentName: student?.name || '',
             grade: studentGrade,
-            subject: selectedSubject,
+            subject: targetSubject,
             term: selectedTerm,
             examType: selectedExamType,
             level,
@@ -597,7 +599,7 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
                 `}
             </div>
 
-            <!-- View Tabs -->
+            
             <div class="flex gap-2 no-print border-b border-slate-200">
                 <button
                     onClick=${() => setActiveView('table')}
@@ -617,7 +619,7 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
                 </button>
             </div>
 
-            <!-- Matrix View -->
+            
             ${activeView === 'matrix' && html`
                 <${AssessmentMatrix} 
                     data=${data} 
@@ -627,10 +629,11 @@ export const Assessments = ({ data, setData, isAdmin, teacherSession, allowedSub
                     allowedSubjects=${allowedSubjects}
                     allowedGrades=${allowedGrades}
                     allowedReligion=${allowedReligion}
+                    updateAssessment=${updateAssessment}
                 />
             `}
 
-            <!-- Table View -->
+            
             ${activeView === 'table' && html`
                 <div class="flex flex-col md:flex-row flex-wrap gap-4 no-print">
                     <div class="flex flex-col gap-1">

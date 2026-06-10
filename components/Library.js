@@ -236,7 +236,7 @@ export const Library = ({ data, setData }) => {
                         </form>
                     `}
 
-                    <!-- Print Header -->
+                    
                     <div class="hidden print:flex flex-col items-center text-center border-b pb-2 mb-2">
                         <img src="${data.settings.schoolLogo}" class="w-12 h-12 mb-1 object-contain" alt="Logo" />
                         <h1 class="text-xl font-black uppercase text-slate-900">${data.settings.schoolName}</h1>
@@ -401,7 +401,7 @@ export const Library = ({ data, setData }) => {
                 </div>
             `}
 
-            <!-- Report Footer -->
+            
             <div class="mt-6 pt-3 border-t border-slate-200 print:border-black">
                 <div class="flex justify-between items-center text-[8px] text-slate-400">
                     <span>${data.settings.schoolName} - ${data.settings.schoolAddress}</span>
